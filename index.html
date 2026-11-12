@@ -19,7 +19,6 @@
   color-scheme:light;                 /* checkboxes and radios follow the app theme, not the phone's */
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top, 0px);
-  padding-bottom:env(safe-area-inset-bottom, 0px);
   --font-d:'Montserrat', 'Noto Sans Ethiopic', 'Nyala', 'Arial Black', system-ui, sans-serif;
   --font-b:'Nunito Sans', 'Noto Sans Ethiopic', 'Nyala', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -90,8 +89,8 @@ p{margin:0 0 10px}
 .screen{display:flex; flex-direction:column; height:100%; animation:fade .22s ease}
 @keyframes fade{from{opacity:0} to{opacity:1}}
 .scroll{flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
-  padding:4px 16px 28px}
-#app[data-nav] .scroll{padding-bottom:104px}
+  padding:4px 16px calc(28px + env(safe-area-inset-bottom, 0px))}
+#app[data-nav] .scroll{padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px))}
 .wrap{width:100%; max-width:560px; margin:0 auto}
 .wrap.wide{max-width:1080px}
 .vcenter{margin:auto 0; width:100%}
@@ -117,11 +116,12 @@ p{margin:0 0 10px}
 /* ============ nav: bottom bar on phones, sidebar on desktop ============ */
 /* one equal column per tab, however many there are (junior accounts have no Wallet tab), so the bar stays centered */
 .tabbar{position:fixed; left:0; right:0; bottom:0; z-index:40; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); justify-content:center;
-  padding:6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); background:var(--side); border-top:1px solid var(--line)}
+  align-items:center; height:auto; min-height:0; margin:0;
+  padding:4px 8px max(4px, calc(env(safe-area-inset-bottom, 0px) - 12px)); background:var(--side); border-top:1px solid var(--line)}
 .tabbar .brand{display:none}
-.tab{background:none; border:0; padding:7px 0 5px; border-radius:10px; display:flex; flex-direction:column; align-items:center;
-  gap:3px; color:var(--ink3); font-size:11.5px; font-weight:800; transition:color .15s}
-.tab svg{width:25px; height:25px}
+.tab{background:none; border:0; padding:5px 0 3px; border-radius:10px; display:flex; flex-direction:column; align-items:center;
+  gap:2px; color:var(--ink3); font-size:11px; font-weight:800; line-height:1.15; transition:color .15s}
+.tab svg{width:24px; height:24px}
 .tab[aria-selected="true"]{color:var(--ink)}
 .tab[aria-selected="true"] svg{color:var(--green)}
 
@@ -277,8 +277,13 @@ hr.sep{border:0; border-top:1px solid var(--line); margin:13px 0}
 .taken{display:flex; align-items:center; min-height:20px; margin-top:1px}
 .taken svg{width:19px; height:19px; margin-right:-6px; display:block}
 .taken .adv{margin-left:10px; font-size:12px; font-weight:800; color:var(--ink3)}
-.clock{font-family:var(--font-d); font-variant-numeric:tabular-nums; font-size:21px; font-weight:800; padding:6px 12px;
-  border-radius:6px; background:var(--clock); color:var(--clock-ink); min-width:98px; text-align:right; transition:.15s}
+.clock{font-family:var(--font-d); font-variant-numeric:tabular-nums; font-size:21px; font-weight:800; padding:6px 12px 6px 10px;
+  border-radius:6px; background:var(--clock); color:var(--clock-ink); min-width:110px; text-align:right; transition:.15s;
+  display:inline-flex; align-items:center; justify-content:space-between; gap:8px; flex:none}
+.clock .clk-ic{display:grid; place-items:center; flex:none; opacity:.85}
+.clock .clk-ic svg{width:17px; height:17px; display:block}
+.clock.on .clk-ic svg{animation:tickTock 1s steps(2) infinite}
+@keyframes tickTock{50%{transform:rotate(12deg)}}
 .clock.on{background:var(--clock-on); color:var(--clock-on-ink)}
 .clock.low.on{background:var(--red); color:#fff}
 .game-side{width:var(--bd); margin-top:8px}
@@ -324,11 +329,25 @@ hr.sep{border:0; border-top:1px solid var(--line); margin:13px 0}
 @keyframes up{from{transform:translateY(100%)} to{transform:none}}
 .grab{width:40px; height:5px; border-radius:9px; background:var(--surface-3); margin:0 auto 16px}
 .sheet h2{margin-bottom:6px}
-.toast{position:fixed; left:50%; bottom:calc(96px + env(safe-area-inset-bottom, 0px)); transform:translate(-50%, 16px);
-  background:var(--ink); color:var(--bg); padding:11px 18px; border-radius:10px; font-weight:800; font-size:14px;
-  z-index:90; opacity:0; transition:.22s; pointer-events:none; max-width:88%; text-align:center}
-.toast.on{opacity:1; transform:translate(-50%, 0)}
+.toast{position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); transform:translate(-50%, 18px) scale(.9);
+  background:var(--ink); color:var(--bg); padding:15px 24px; border-radius:14px; font-weight:800; font-size:15.5px; line-height:1.4;
+  width:min(94vw, 600px); box-shadow:0 18px 40px -14px rgba(0,0,0,.55);
+  z-index:90; opacity:0; transition:opacity .2s, transform .28s cubic-bezier(.2,1.5,.4,1); pointer-events:none; text-align:center}
+.toast.on{opacity:1; transform:translate(-50%, 0) scale(1)}
 #fx{position:fixed; inset:0; pointer-events:none; z-index:80}
+/* the selected choice in a small segmented control (Play Friends "You play", calendars, reminders) */
+.seg.sm button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:0 0 0 3px var(--green)}
+/* a note with a small leading icon */
+.note.with-ic{display:flex; gap:10px; align-items:flex-start}
+.note.with-ic > svg{width:18px; height:18px; flex:none; margin-top:1px; color:var(--green-ink)}
+/* lessons: three in a row, then free practice */
+.streak{display:flex; gap:6px; justify-content:center; align-items:center; font-size:12.5px; font-weight:800; color:var(--ink2)}
+.streak i{width:12px; height:12px; border-radius:50%; background:var(--surface-3); box-shadow:inset 0 0 0 2px var(--line); transition:background .2s, transform .2s}
+.streak i.on{background:var(--green); box-shadow:none; transform:scale(1.15)}
+.practice-chip{display:inline-flex; align-items:center; gap:6px; padding:3px 12px 3px 6px; border-radius:99px; background:rgba(129,182,76,.18); color:var(--green-ink); font-size:13px; font-weight:800}
+.practice-chip .pawn-ic{width:28px; height:28px; display:grid; place-items:center}
+.practice-chip .pawn-ic svg, .task .dotc.pawn svg{width:100%; height:100%; display:block; filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+.task .dotc.pawn{width:40px; height:40px; padding:2px; background:var(--surface-2)}
 
 /* result */
 .res-head{position:relative; overflow:hidden; margin:-10px -18px 0; padding:26px 18px 20px; text-align:center;
@@ -429,7 +448,9 @@ hr.sep{border:0; border-top:1px solid var(--line); margin:13px 0}
 .stats4{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border-radius:var(--r-card); overflow:hidden; box-shadow:var(--shadow)}
 .stats4 div{background:var(--surface); padding:13px 6px 12px; text-align:center}
 .stats4 b{display:block; font-family:var(--font-d); font-weight:800; font-size:19px}
-.stats4 span{font-size:12px; color:var(--ink2); font-weight:700}
+.stats4 span{font-size:12px; color:var(--ink2); font-weight:700; display:block; line-height:1.25; margin-top:2px}
+.stats4.progress4 b{font-size:18px}
+@media (max-width:400px){ .stats4.progress4{grid-template-columns:repeat(2,1fr)} }
 .lvl{display:flex; align-items:center; gap:12px}
 .lvl .badge{width:44px; height:44px; border-radius:10px; background:var(--gold); color:#3A2A00; display:grid; place-items:center;
   font-family:var(--font-d); font-weight:900; font-size:18px; box-shadow:0 3px 0 var(--gold-edge); flex:none}
@@ -626,24 +647,27 @@ hr.sep{border:0; border-top:1px solid var(--line); margin:13px 0}
   .game .pbar, .game .game-side{width:max(var(--bd), min(calc(100vw - 32px), 440px))}
   .game-side{margin-top:10px}
 }
-@media (max-width:1039px) and (max-height:760px){
-  .fp-strip .fp-more{display:none}                /* short phones: the headlines side by side; tapping opens the full text */
+@media (max-width:1039px){
+  .fp-strip .fp-more{display:none}                /* phones: the headlines side by side, so the board gets the height; tapping opens the full text */
   .strips{display:grid; grid-template-columns:1fr 1fr}
   .strips .fp-strip{align-items:center; padding:8px 10px; font-size:12px; line-height:1.25}
   .strips .fp-strip + .fp-strip{border-left:1px solid var(--line)}
+}
+@media (max-width:1039px) and (max-height:760px){
   .game{padding-top:14px}
   .moves{min-height:38px; padding:6px 10px}
   .actions{margin-top:4px}
   .act{padding:6px 4px 5px}
 }
 @media (max-width:420px){
-  .clock{font-size:19px; min-width:84px; padding:5px 10px}
+  .clock{font-size:19px; min-width:96px; padding:5px 9px 5px 8px; gap:6px}
+  .clock .clk-ic svg{width:15px; height:15px}
   .pbar{gap:8px}
   .pbar .av{width:38px; height:38px; font-size:30px}
   .pbar .who b{font-size:14px}
 }
 @media (min-width:1040px){
-  .game{justify-content:center; align-items:flex-start; padding:28px 32px 24px}
+  .game{justify-content:center; align-items:flex-start; padding:16px 32px 14px}
   .game > .game-main, .game > .game-side{margin:auto 0}
   .game-top{padding-bottom:14px}
 }
@@ -662,7 +686,7 @@ hr.sep{border:0; border-top:1px solid var(--line); margin:13px 0}
 .net-banner span{display:block; font-size:12.5px; line-height:1.4; margin-top:3px; color:rgba(255,255,255,.88)}
 .fp-strip.net{background:var(--surface-2)}
 .fp-strip.net svg{color:var(--green-ink)}
-.net-notice{background:var(--surface); border-radius:var(--r-card, 14px); box-shadow:var(--shadow); padding:14px 16px; border-left:4px solid var(--gold)}
+.net-notice{background:var(--surface); border-radius:var(--r-card, 14px); box-shadow:var(--shadow), inset 0 0 0 2px var(--gold); padding:14px 16px}
 .net-notice .nn-head{display:flex; align-items:center; gap:8px; font-size:15px}
 .net-notice .nn-head svg{width:20px; height:20px; color:var(--gold-edge, var(--gold)); flex:none}
 .net-notice p{margin:8px 0 0; font-size:13.5px; line-height:1.5; color:var(--ink2)}
@@ -720,7 +744,7 @@ hr.sep{border:0; border-top:1px solid var(--line); margin:13px 0}
   .game-top{padding-top:6px; padding-bottom:6px}
   .game .pbar{padding:3px 2px}
   .game .pbar .av{width:34px; height:34px; font-size:26px}
-  .game .clock{font-size:17px; padding:4px 9px; min-width:76px}
+  .game .clock{font-size:17px; padding:4px 9px; min-width:88px}
 }
 .board.phaser-board canvas{display:block}
 .mode.resume{background:var(--surface); box-shadow:0 0 0 2px var(--green), var(--shadow)}
@@ -759,6 +783,12 @@ textarea.inp{font-size:15px; font-weight:600; font-family:inherit}
 .chip.off{background:var(--red-soft); color:var(--red); padding:1px 6px; font-size:11px; margin-left:4px}
 .act .half{font-family:var(--font-d); font-weight:900; font-size:19px; line-height:22px; height:22px}
 
+/* ============ the playing board: as big as the screen allows ============ */
+.game .board-stage{padding:0 3px 18px 17px}
+@media (min-width:1040px){
+  .game{gap:20px}
+  .game-side{width:330px}
+}
 /* ============ coordinates outside the board ============ */
 .board-stage{padding:0 18px 20px; max-width:100%}
 .board.phaser-board canvas{display:block; border-radius:6px; position:absolute; left:0; top:0}   /* out of the flow: the box sets the size, never the canvas */
@@ -1547,12 +1577,24 @@ const LESSON_COUNTS = { chess: 12, checkers: 6 };
 const LESSON_COUNT = 12, LESSON_XP = 25;   // LESSON_COUNT is the largest, used for input checks
 
 const tierOf = r => TIERS.slice().reverse().find(t => r >= t.min);
-const xpNeeded = lv => 100 + lv * 60;
+/* Levels, the same for junior and full accounts: every level takes XP_PER_LEVEL, up to MAX_LEVEL.
+   Games: a win earns WIN_XP, a loss or a draw earns nothing, and resigning or losing on a connection that did not come
+   back in time costs PENALTY_XP (never below zero XP, and a level once reached is kept). */
+const MAX_LEVEL = 999, XP_PER_LEVEL = 50, WIN_XP = 5, PENALTY_XP = -5;
+const xpNeeded = lv => XP_PER_LEVEL;
 function addXP(p, n){                     // mutates {xp, level}; returns levels gained
-  p.xp += n; let ups = 0;
-  while (p.xp >= xpNeeded(p.level)){ p.xp -= xpNeeded(p.level); p.level++; ups++; }
+  p.level = Math.min(MAX_LEVEL, Math.max(1, p.level || 1));
+  p.xp = Math.max(0, (p.xp || 0) + (n || 0)); let ups = 0;
+  while (p.level < MAX_LEVEL && p.xp >= XP_PER_LEVEL){ p.xp -= XP_PER_LEVEL; p.level++; ups++; }
+  if (p.level >= MAX_LEVEL) p.xp = 0;
   return ups;
 }
+/* an account saved under the old level curve: carry any extra XP up into levels */
+const normalizeLevel = p => { if (p && (p.xp >= XP_PER_LEVEL || p.level > MAX_LEVEL || p.xp < 0)) addXP(p, 0); return p; };
+/* was this game lost by resigning, or by a lost connection that was not restored in time? */
+const penalized = reason => /resign|disconnect|lost connection|connection that was not/i.test(String(reason || ''));
+/* XP for one finished game. result: 'W' | 'D' | 'L'; reason: how it ended */
+const gameXP = (result, reason) => result === 'W' ? WIN_XP : result === 'L' && penalized(reason) ? PENALTY_XP : 0;
 /* k: 40 while a player's rating is still settling (fewer than MATCH.PROVISIONAL_K_GAMES games), else 32 */
 function elo(mine, theirs, score, k){
   const exp = 1 / (1 + Math.pow(10, (theirs - mine) / 400));
@@ -1563,8 +1605,8 @@ const kFactor = games => games < MATCH.PROVISIONAL_K_GAMES ? 40 : 32;
 const matchRating = (rating, peak) => Math.max(rating, (peak || rating) - MATCH.SANDBAG_MARGIN);
 /* how far apart two waiting players may be after `waitedMs` (the same rule the server uses) */
 const matchWindow = waitedMs => Math.min(MATCH.MAX_GAP, MATCH.START + Math.floor(waitedMs / 1000 / MATCH.EVERY_S) * MATCH.STEP);
-const botXP    = (level, r) => r === 'W' ? 30 + level * 12 : r === 'D' ? 18 : 8;
-const rankedXP = r => r === 'W' ? 70 : r === 'D' ? 35 : 20;
+const botXP    = (level, r, reason) => gameXP(r, reason);
+const rankedXP = (r, reason) => gameXP(r, reason);
 const levelForRating = r => r < 800 ? 1 : r < 1100 ? 2 : r < 1450 ? 3 : 4;
 
 /* Ethiopian mobile numbers: Ethio Telecom 09…, Safaricom 07…. Returns +2519XXXXXXXX or null. */
@@ -1579,7 +1621,7 @@ const packById = id => PACKS.find(p => p.id === id) || null;
 const stakeUnlocked = (stake, games) => stake === STAKES[0] || games >= API.STAKE_UNLOCK_GAMES;   // reads API so a server override applies
 
 const API = { CONNECTION, GAMES_PLAYABLE, RATE, WELCOME_TOKENS, MIN_CASHOUT, MAX_CASHOUT_PER_DAY, STAKE_UNLOCK_GAMES, REPORT_REASONS, STAKES, MATCH, kFactor, matchRating, matchWindow, CLOCK_MS, PACKS, TIERS, BOTS, RIVALS, AVATARS,
-  LESSON_COUNT, LESSON_COUNTS, LESSON_XP, tierOf, xpNeeded, addXP, elo, botXP, rankedXP, levelForRating, normalizePhone, packById, stakeUnlocked };
+  LESSON_COUNT, LESSON_COUNTS, LESSON_XP, tierOf, xpNeeded, addXP, elo, MAX_LEVEL, XP_PER_LEVEL, WIN_XP, PENALTY_XP, normalizeLevel, penalized, gameXP, botXP, rankedXP, levelForRating, normalizePhone, packById, stakeUnlocked };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.Rules = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1700,7 +1742,7 @@ const RULES = typeof module !== 'undefined' && module.exports ? require('./rules
 const GRACE_S = RULES && RULES.CONNECTION ? RULES.CONNECTION.GRACE_S : 60;   // seconds to reconnect, filled into {grace}
 
 const TERMS = {
-  version: 4, effective: '2026-10-12',
+  version: 5, effective: '2026-11-12',
   en: { title: 'Terms of Service', sections: [
     { h: '1. Agreement', p: ['King Safari is operated by {operator}. These Terms of Service are an agreement between you and {operator}. By creating an account or using King Safari you accept these terms, the Privacy Policy and the Fair Play & Anti-Cheating Policy, which form part of these terms.'] },
     { h: '2. Who may play', p: ['You may use King Safari only if all of the following are true:'], list: [
@@ -1734,22 +1776,29 @@ const TERMS = {
       'The King Safari server checks every move, keeps both clocks and decides the result. Its record is final, except where the Fair Play Team reverses a result.',
       'If your connection drops during a match, you have {grace} seconds to reconnect. Your clock keeps running while you are away. If you do not return in time, you forfeit the match and your stake, as if you had resigned.',
       'Before each match the app checks your connection. You cannot join a match while your connection is too weak or unstable.',
-      'Players are matched only with opponents of a similar rating.'] },
-    { h: '8. Your connection, device and power', p: ['You alone are responsible for the internet connection, mobile network, data bundle, device, software and power you use to play. King Safari does not provide, control or guarantee any of them.'], list: [
+      'Players are matched only with opponents of a similar rating.',
+      'A ranked match cannot be paused or left to come back to later. Leaving a match in progress means resigning. Only a dropped internet connection gets time to come back, under the connection rules.',
+      'In the stand-alone practice version, ranked matches use demo tokens with no money value, and the two phones connect directly to each other (see the Privacy Policy, section 5).'] },
+    { h: '8. Friendly games, levels and XP', list: [
+      'Play Friends lets you play a friend you invite with a code. Friendly games have no tokens, no stakes and no rating. Junior accounts play only with junior accounts, and adult accounts only with adult accounts.',
+      'In friendly games, bot games and pass-and-play you may leave and come back later. A friendly game whose player stays disconnected for more than 10 minutes ends, and the player who did not come back loses it.',
+      'Levels go from 1 to 999, one level for every 50 XP. A won game earns 5 XP; a lost or drawn game earns none; resigning, or losing on a connection that was not restored in time, costs 5 XP. XP never goes below zero within a level, and a level once reached is kept.',
+      'XP and levels have no money value. They cannot be bought, sold, exchanged or transferred.'] },
+    { h: '9. Your connection, device and power', p: ['You alone are responsible for the internet connection, mobile network, data bundle, device, software and power you use to play. King Safari does not provide, control or guarantee any of them.'], list: [
       'King Safari is not responsible for any lost match, stake, prize, rating or tokens caused by your connection dropping or slowing down, your network operator, a flat battery or power cut, a phone call, your device restarting or closing the app, or any other problem on your side.',
       'A match lost because you disconnected and did not reconnect in time stands. It is not replayed, refunded or compensated, and support cannot reverse it.',
       'The connection check before a match and the time allowed to reconnect are there to help you. They are not a promise that your connection will work.',
       'Disconnecting on purpose, for example to avoid a loss or to run down an opponent\'s clock, is a fair-play violation.',
       'Play ranked only where your signal is strong and steady, with enough battery and data for the whole match.'],
       after: ['The only exception is a verified fault on King Safari\'s own servers. If one interrupts a match, we restore the clocks or, where the match cannot fairly continue, cancel it and return both stakes.'] },
-    { h: '9. Cash-outs', list: [
+    { h: '10. Cash-outs', list: [
       'Cash-outs are paid only to the telebirr wallet registered to your account\'s phone number.',
       'The minimum cash-out is {minCashout} birr and the maximum is {maxCashout} birr per 24 hours.',
       'We may verify your identity (Fayda ID) before paying a cash-out.',
       'Cash-outs from accounts under fair-play review are held until the review ends.'] },
-    { h: '10. Fair play', p: ['Cheating is not accepted under any circumstances. A confirmed violation permanently disables your account, permanently bars your phone number from King Safari and forfeits all of your earnings, as set out in the Fair Play & Anti-Cheating Policy.'] },
-    { h: '11. Responsible play', p: ['King Safari offers deposit limits, time-outs, self-exclusion and play-time reminders in your profile. We may limit or close an account that shows signs of harmful play. If gambling is causing you problems, set a limit or exclude yourself, and talk to someone you trust.'] },
-    { h: '12. Prohibited use and content rules', p: ['You must not use King Safari for any unlawful purpose; harass other players; attempt to access other accounts or our systems; or interfere with the app, its servers or other players\' games. Display names, messages and every other text you enter must not contain:'], list: [
+    { h: '11. Fair play', p: ['Cheating is not accepted under any circumstances. A confirmed violation permanently disables your account, permanently bars your phone number from King Safari and forfeits all of your earnings, as set out in the Fair Play & Anti-Cheating Policy.'] },
+    { h: '12. Responsible play', p: ['King Safari offers deposit limits, time-outs, self-exclusion and play-time reminders in your profile. We may limit or close an account that shows signs of harmful play. If gambling is causing you problems, set a limit or exclude yourself, and talk to someone you trust.'] },
+    { h: '13. Prohibited use and content rules', p: ['You must not use King Safari for any unlawful purpose; harass other players; attempt to access other accounts or our systems; or interfere with the app, its servers or other players\' games. Display names, messages and every other text you enter must not contain:'], list: [
       'Profanity, insults or sexual content.',
       'Hate speech or slurs against any ethnic group, religion, nationality, region, gender or person.',
       'Threats or violent language.',
@@ -1757,11 +1806,11 @@ const TERMS = {
       'Betting or gambling promotion, advertising, links, or contact details in a display name.',
       'Names that pretend to be King Safari staff, Ethio Telecom, telebirr, the police or any other authority, or false information about yourself.'],
       after: ['We check names and messages automatically and may refuse them, rename an account, or suspend or close an account that breaks these rules. Refused texts are recorded so our team can review them.'] },
-    { h: '13. Closing an account', p: ['You may close your account at any time from your profile. Cash out first: tokens left in a closed account are forfeited. We may suspend or close an account that breaks these terms. Money records are kept as the law requires even after an account closes.'] },
-    { h: '14. Availability and changes', p: ['We work to keep King Safari available, but it may be paused for maintenance or for reasons outside our control. We may change these terms. You will be asked to accept a new version before you next buy tokens or play ranked.'] },
-    { h: '15. Liability', p: ['King Safari is provided as it is. To the extent the law allows, our total liability to you is limited to the value of the cashable tokens in your account. In particular, we are not liable for losses caused by internet, mobile network, power or device failures, by your network operator, or by events beyond our reasonable control. Nothing in these terms limits liability that cannot be limited under Ethiopian law.'] },
-    { h: '16. Complaints and governing law', p: ['Contact {support} with any complaint. We reply within 5 working days. These terms are governed by the laws of the Federal Democratic Republic of Ethiopia, and disputes are heard by the courts of Addis Ababa.'] },
-    { h: '17. Contact', p: ['{operator} · {support}'] }
+    { h: '14. Closing an account', p: ['You may close your account at any time from your profile. Cash out first: tokens left in a closed account are forfeited. We may suspend or close an account that breaks these terms. Money records are kept as the law requires even after an account closes.'] },
+    { h: '15. Availability and changes', p: ['We work to keep King Safari available, but it may be paused for maintenance or for reasons outside our control. We may change these terms. You will be asked to accept a new version before you next buy tokens or play ranked.'] },
+    { h: '16. Liability', p: ['King Safari is provided as it is. To the extent the law allows, our total liability to you is limited to the value of the cashable tokens in your account. In particular, we are not liable for losses caused by internet, mobile network, power or device failures, by your network operator, or by events beyond our reasonable control. Nothing in these terms limits liability that cannot be limited under Ethiopian law.'] },
+    { h: '17. Complaints and governing law', p: ['Contact {support} with any complaint. We reply within 5 working days. These terms are governed by the laws of the Federal Democratic Republic of Ethiopia, and disputes are heard by the courts of Addis Ababa.'] },
+    { h: '18. Contact', p: ['{operator} · {support}'] }
   ] },
   am: { title: 'የአገልግሎት ውል', sections: [
     { h: '1. ስምምነት', p: ['ኪንግ ሳፋሪ የሚተዳደረው በ{operator} ነው። ይህ የአገልግሎት ውል በእርስዎ እና በ{operator} መካከል የሚደረግ ስምምነት ነው። መለያ በመክፈት ወይም ኪንግ ሳፋሪን በመጠቀም ይህን ውል፣ የግላዊነት ፖሊሲውን እና የዚህ ውል አካል የሆነውን የፍትሃዊ ጨዋታ እና ፀረ-ማጭበርበር ፖሊሲ ይቀበላሉ።'] },
@@ -1796,22 +1845,29 @@ const TERMS = {
       'የኪንግ ሳፋሪ አገልጋይ እያንዳንዱን እንቅስቃሴ ያረጋግጣል፣ ሁለቱንም ሰዓቶች ይቆጣጠራል፣ ውጤቱንም ይወስናል። የፍትሃዊ ጨዋታ ቡድኑ ውጤቱን ካልቀለበሰ በስተቀር መዝገቡ የመጨረሻ ነው።',
       'በጨዋታ ላይ ሳሉ ግንኙነትዎ ቢቋረጥ፣ እንደገና ለመገናኘት {grace} ሰከንድ አለዎት። በሌሉበት ጊዜም ሰዓትዎ መሮጡን ይቀጥላል። በጊዜው ካልተመለሱ፣ ልክ እጅ እንደሰጡ ተቆጥሮ ጨዋታውን እና ውርርድዎን ያጣሉ።',
       'ከእያንዳንዱ ጨዋታ በፊት መተግበሪያው ግንኙነትዎን ይፈትሻል። ግንኙነትዎ በጣም ደካማ ወይም ያልተረጋጋ ሆኖ ሳለ ወደ ጨዋታ መግባት አይችሉም።',
-      'ተጫዋቾች የሚገናኙት ተመሳሳይ ደረጃ ካላቸው ተጋጣሚዎች ጋር ብቻ ነው።'] },
-    { h: '8. ግንኙነትዎ፣ መሣሪያዎ እና ኃይል', p: ['ለመጫወት ለሚጠቀሙበት የኢንተርኔት ግንኙነት፣ የሞባይል ኔትወርክ፣ የዳታ ጥቅል፣ መሣሪያ፣ ሶፍትዌር እና የኤሌክትሪክ ኃይል ኃላፊነቱ የእርስዎ ብቻ ነው። ኪንግ ሳፋሪ ከእነዚህ አንዱንም አያቀርብም፣ አይቆጣጠርም፣ ዋስትናም አይሰጥም።'], list: [
+      'ተጫዋቾች የሚገናኙት ተመሳሳይ ደረጃ ካላቸው ተጋጣሚዎች ጋር ብቻ ነው።',
+      'የደረጃ ጨዋታ ሊቆም ወይም በኋላ ለመመለስ ሊተው አይችልም። እየተካሄደ ያለን ጨዋታ መልቀቅ እጅ እንደመስጠት ይቆጠራል። ለመመለስ ጊዜ የሚሰጠው በግንኙነት ደንቦቹ መሠረት የኢንተርኔት ግንኙነት ሲቋረጥ ብቻ ነው።',
+      'ራሱን በቻለው የልምምድ እትም፣ የደረጃ ጨዋታዎች የገንዘብ ዋጋ የሌላቸውን የማሳያ ቶከኖች ይጠቀማሉ፣ ሁለቱ ስልኮችም በቀጥታ እርስ በርስ ይገናኛሉ (የግላዊነት ፖሊሲውን ክፍል 5 ይመልከቱ)።'] },
+    { h: '8. የወዳጅነት ጨዋታዎች፣ ደረጃዎች እና XP', list: [
+      '"ከጓደኞች ጋር ተጫወት" በኮድ ከሚጋብዙት ጓደኛ ጋር እንዲጫወቱ ያስችልዎታል። የወዳጅነት ጨዋታዎች ቶከን፣ ውርርድ ወይም የደረጃ ነጥብ የላቸውም። የታዳጊ መለያዎች የሚጫወቱት ከታዳጊ መለያዎች ጋር ብቻ፣ የአዋቂ መለያዎችም ከአዋቂ መለያዎች ጋር ብቻ ነው።',
+      'በወዳጅነት ጨዋታዎች፣ በቦት ጨዋታዎች እና በአንድ ስልክ ተቀባብሎ በመጫወት ወጥተው በኋላ መመለስ ይችላሉ። ተጫዋቹ ከ10 ደቂቃ በላይ ግንኙነቱ ተቋርጦ የቆየበት የወዳጅነት ጨዋታ ያበቃል፣ ያልተመለሰውም ተጫዋች ይሸነፋል።',
+      'ደረጃዎች ከ1 እስከ 999 ናቸው፣ ለእያንዳንዱ 50 XP አንድ ደረጃ። ያሸነፉት ጨዋታ 5 XP ያስገኛል፤ የተሸነፉበት ወይም አቻ የወጡበት ጨዋታ ምንም አያስገኝም፤ እጅ መስጠት፣ ወይም በጊዜው ባልተመለሰ ግንኙነት መሸነፍ 5 XP ያስቀንሳል። XP በአንድ ደረጃ ውስጥ ከዜሮ በታች አይወርድም፣ የተደረሰበት ደረጃም ይቆያል።',
+      'XP እና ደረጃዎች የገንዘብ ዋጋ የላቸውም። ሊገዙ፣ ሊሸጡ፣ ሊለወጡ ወይም ሊተላለፉ አይችሉም።'] },
+    { h: '9. ግንኙነትዎ፣ መሣሪያዎ እና ኃይል', p: ['ለመጫወት ለሚጠቀሙበት የኢንተርኔት ግንኙነት፣ የሞባይል ኔትወርክ፣ የዳታ ጥቅል፣ መሣሪያ፣ ሶፍትዌር እና የኤሌክትሪክ ኃይል ኃላፊነቱ የእርስዎ ብቻ ነው። ኪንግ ሳፋሪ ከእነዚህ አንዱንም አያቀርብም፣ አይቆጣጠርም፣ ዋስትናም አይሰጥም።'], list: [
       'ግንኙነትዎ በመቋረጡ ወይም በመዘግየቱ፣ በኔትወርክ አቅራቢዎ፣ ባትሪ በማለቁ ወይም መብራት በመጥፋቱ፣ በስልክ ጥሪ፣ መሣሪያዎ እንደገና በመነሳቱ ወይም መተግበሪያውን በመዝጋቱ፣ ወይም በእርስዎ በኩል ባለ ማንኛውም ሌላ ችግር ምክንያት ለሚጠፋ ጨዋታ፣ ውርርድ፣ ሽልማት፣ ደረጃ ወይም ቶከን ኪንግ ሳፋሪ ኃላፊነት የለበትም።',
       'ግንኙነትዎ ተቋርጦ በጊዜው ባለመመለስዎ የተሸነፉበት ጨዋታ ውጤቱ ጸንቶ ይቆያል። ጨዋታው በድጋሚ አይደረግም፣ ገንዘብ አይመለስም፣ ካሳም አይከፈልም፤ ድጋፍ ሰጪዎችም ውጤቱን መቀልበስ አይችሉም።',
       'ከጨዋታ በፊት የሚደረገው የግንኙነት ፍተሻ እና እንደገና ለመገናኘት የሚሰጠው ጊዜ እርስዎን ለመርዳት ነው። ግንኙነትዎ እንደሚሠራ ቃል መግባት አይደሉም።',
       'ሆን ብሎ ግንኙነትን ማቋረጥ፣ ለምሳሌ ሽንፈትን ለማስቀረት ወይም የተጋጣሚን ሰዓት ለማባከን፣ የፍትሃዊ ጨዋታ ጥሰት ነው።',
       'የደረጃ ጨዋታ የሚጫወቱት ኔትወርክዎ ጠንካራ እና የተረጋጋ በሆነበት ቦታ፣ ለሙሉ ጨዋታው የሚበቃ ባትሪ እና ዳታ ይዘው ብቻ ይሁን።'],
       after: ['ብቸኛው ልዩ ሁኔታ በኪንግ ሳፋሪ የራሱ አገልጋዮች ላይ የተረጋገጠ ብልሽት ነው። እንዲህ ያለ ብልሽት ጨዋታን ካቋረጠ ሰዓቶቹን እንመልሳለን፤ ጨዋታው በፍትሃዊነት መቀጠል ካልቻለ ደግሞ እንሰርዘዋለን፣ ሁለቱንም ውርርዶችም እንመልሳለን።'] },
-    { h: '9. ወጪ ማድረግ', list: [
+    { h: '10. ወጪ ማድረግ', list: [
       'ወጪ የሚከፈለው በመለያዎ ስልክ ቁጥር ወደተመዘገበው የቴሌብር ቦርሳ ብቻ ነው።',
       'ዝቅተኛው ወጪ {minCashout} ብር፣ ከፍተኛው ደግሞ በ24 ሰዓት {maxCashout} ብር ነው።',
       'ወጪ ከመክፈላችን በፊት ማንነትዎን (የፋይዳ መታወቂያ) ልናረጋግጥ እንችላለን።',
       'በፍትሃዊ ጨዋታ ግምገማ ላይ ካሉ መለያዎች የሚጠየቅ ወጪ ግምገማው እስኪያልቅ ይያዛል።'] },
-    { h: '10. ፍትሃዊ ጨዋታ', p: ['ማጭበርበር በምንም ሁኔታ ተቀባይነት የለውም። የተረጋገጠ ጥሰት በፍትሃዊ ጨዋታ እና ፀረ-ማጭበርበር ፖሊሲው መሠረት መለያዎን በቋሚነት ያግዳል፣ ስልክ ቁጥርዎን ከኪንግ ሳፋሪ በቋሚነት ያግዳል፣ እና ገቢዎን በሙሉ ያስወርሳል።'] },
-    { h: '11. ኃላፊነት የተሞላበት ጨዋታ', p: ['ኪንግ ሳፋሪ በመገለጫዎ ውስጥ የተቀማጭ ገደቦች፣ የእረፍት ጊዜ፣ ራስን ማግለል እና የጨዋታ ጊዜ ማስታወሻዎችን ያቀርባል። ጎጂ የጨዋታ ምልክቶች የሚያሳይ መለያን ልንገድብ ወይም ልንዘጋ እንችላለን። ቁማር ችግር እየፈጠረብዎ ከሆነ ገደብ ያስቀምጡ ወይም ራስዎን ያግልሉ፣ እና ከሚያምኑት ሰው ጋር ይነጋገሩ።'] },
-    { h: '12. የተከለከሉ አጠቃቀሞች እና የይዘት ደንቦች', p: ['ኪንግ ሳፋሪን ለሕገ-ወጥ ዓላማ መጠቀም፣ ሌሎች ተጫዋቾችን ማዋከብ፣ ሌሎች መለያዎችን ወይም ስርዓቶቻችንን ለመድረስ መሞከር፣ ወይም በመተግበሪያው፣ በአገልጋዮቹ ወይም በሌሎች ተጫዋቾች ጨዋታ ላይ ጣልቃ መግባት የለብዎትም። የሚታይ ስም፣ መልእክቶች እና የሚያስገቡት ማንኛውም ሌላ ጽሑፍ የሚከተሉትን መያዝ የለበትም፦'], list: [
+    { h: '11. ፍትሃዊ ጨዋታ', p: ['ማጭበርበር በምንም ሁኔታ ተቀባይነት የለውም። የተረጋገጠ ጥሰት በፍትሃዊ ጨዋታ እና ፀረ-ማጭበርበር ፖሊሲው መሠረት መለያዎን በቋሚነት ያግዳል፣ ስልክ ቁጥርዎን ከኪንግ ሳፋሪ በቋሚነት ያግዳል፣ እና ገቢዎን በሙሉ ያስወርሳል።'] },
+    { h: '12. ኃላፊነት የተሞላበት ጨዋታ', p: ['ኪንግ ሳፋሪ በመገለጫዎ ውስጥ የተቀማጭ ገደቦች፣ የእረፍት ጊዜ፣ ራስን ማግለል እና የጨዋታ ጊዜ ማስታወሻዎችን ያቀርባል። ጎጂ የጨዋታ ምልክቶች የሚያሳይ መለያን ልንገድብ ወይም ልንዘጋ እንችላለን። ቁማር ችግር እየፈጠረብዎ ከሆነ ገደብ ያስቀምጡ ወይም ራስዎን ያግልሉ፣ እና ከሚያምኑት ሰው ጋር ይነጋገሩ።'] },
+    { h: '13. የተከለከሉ አጠቃቀሞች እና የይዘት ደንቦች', p: ['ኪንግ ሳፋሪን ለሕገ-ወጥ ዓላማ መጠቀም፣ ሌሎች ተጫዋቾችን ማዋከብ፣ ሌሎች መለያዎችን ወይም ስርዓቶቻችንን ለመድረስ መሞከር፣ ወይም በመተግበሪያው፣ በአገልጋዮቹ ወይም በሌሎች ተጫዋቾች ጨዋታ ላይ ጣልቃ መግባት የለብዎትም። የሚታይ ስም፣ መልእክቶች እና የሚያስገቡት ማንኛውም ሌላ ጽሑፍ የሚከተሉትን መያዝ የለበትም፦'], list: [
       'ጸያፍ ቃላት፣ ስድብ ወይም የወሲብ ይዘት።',
       'በማንኛውም ብሔር፣ ሃይማኖት፣ ዜግነት፣ ክልል፣ ጾታ ወይም ሰው ላይ የሚነገር የጥላቻ ንግግር ወይም ስድብ።',
       'ማስፈራሪያ ወይም የኃይል ቋንቋ።',
@@ -1819,16 +1875,16 @@ const TERMS = {
       'የውርርድ ወይም የቁማር ማስተዋወቂያ፣ ማስታወቂያ፣ ሊንኮች፣ ወይም በሚታይ ስም ውስጥ የመገናኛ አድራሻ።',
       'የኪንግ ሳፋሪ ሠራተኛ፣ ኢትዮ ቴሌኮም፣ ቴሌብር፣ ፖሊስ ወይም ሌላ ባለሥልጣን መስለው የሚቀርቡ ስሞች፣ ወይም ስለራስዎ የሚሰጥ የሐሰት መረጃ።'],
       after: ['ስሞችን እና መልእክቶችን በራስ-ሰር እንፈትሻለን፤ ልንከለክላቸው፣ የመለያን ስም ልንቀይር፣ ወይም እነዚህን ደንቦች የጣሰን መለያ ልናግድ ወይም ልንዘጋ እንችላለን። ውድቅ የተደረጉ ጽሑፎች ቡድናችን እንዲገመግማቸው ይመዘገባሉ።'] },
-    { h: '13. መለያ መዝጋት', p: ['መለያዎን በማንኛውም ጊዜ ከመገለጫዎ መዝጋት ይችላሉ። መጀመሪያ ወጪ ያድርጉ፦ በተዘጋ መለያ የቀሩ ቶከኖች ይወረሳሉ። ይህን ውል የጣሰ መለያን ልናግድ ወይም ልንዘጋ እንችላለን። የገንዘብ መዝገቦች መለያው ከተዘጋ በኋላም ሕጉ በሚጠይቀው መሠረት ይቀመጣሉ።'] },
-    { h: '14. አገልግሎት እና ለውጦች', p: ['ኪንግ ሳፋሪ ሁልጊዜ እንዲሠራ እንጥራለን፣ ነገር ግን ለጥገና ወይም ከቁጥጥራችን ውጭ በሆኑ ምክንያቶች ሊቆም ይችላል። ይህን ውል ልንቀይር እንችላለን። ቀጣይ ቶከን ከመግዛትዎ ወይም የደረጃ ጨዋታ ከመጫወትዎ በፊት አዲሱን እትም እንዲቀበሉ ይጠየቃሉ።'] },
-    { h: '15. ተጠያቂነት', p: ['ኪንግ ሳፋሪ የሚቀርበው ባለበት ሁኔታ ነው። ሕጉ በሚፈቅደው መጠን ለእርስዎ ያለብን ጠቅላላ ተጠያቂነት በመለያዎ ውስጥ ባሉ ወጪ የሚደረጉ ቶከኖች ዋጋ የተወሰነ ነው። በተለይም በኢንተርኔት፣ በሞባይል ኔትወርክ፣ በኤሌክትሪክ ኃይል ወይም በመሣሪያ ብልሽት፣ በኔትወርክ አቅራቢዎ፣ ወይም ከምክንያታዊ ቁጥጥራችን ውጭ በሆኑ ክስተቶች ምክንያት ለሚደርስ ኪሳራ ተጠያቂ አይደለንም። በዚህ ውል ውስጥ ያለ ምንም ነገር በኢትዮጵያ ሕግ ሊገደብ የማይችልን ተጠያቂነት አይገድብም።'] },
-    { h: '16. ቅሬታዎች እና የሚገዛው ሕግ', p: ['ማንኛውንም ቅሬታ ለ{support} ያሳውቁ። በ5 የሥራ ቀናት ውስጥ ምላሽ እንሰጣለን። ይህ ውል የሚገዛው በኢትዮጵያ ፌዴራላዊ ዴሞክራሲያዊ ሪፐብሊክ ሕጎች ሲሆን አለመግባባቶች በአዲስ አበባ ፍርድ ቤቶች ይታያሉ።'] },
-    { h: '17. አድራሻ', p: ['{operator} · {support}'] }
+    { h: '14. መለያ መዝጋት', p: ['መለያዎን በማንኛውም ጊዜ ከመገለጫዎ መዝጋት ይችላሉ። መጀመሪያ ወጪ ያድርጉ፦ በተዘጋ መለያ የቀሩ ቶከኖች ይወረሳሉ። ይህን ውል የጣሰ መለያን ልናግድ ወይም ልንዘጋ እንችላለን። የገንዘብ መዝገቦች መለያው ከተዘጋ በኋላም ሕጉ በሚጠይቀው መሠረት ይቀመጣሉ።'] },
+    { h: '15. አገልግሎት እና ለውጦች', p: ['ኪንግ ሳፋሪ ሁልጊዜ እንዲሠራ እንጥራለን፣ ነገር ግን ለጥገና ወይም ከቁጥጥራችን ውጭ በሆኑ ምክንያቶች ሊቆም ይችላል። ይህን ውል ልንቀይር እንችላለን። ቀጣይ ቶከን ከመግዛትዎ ወይም የደረጃ ጨዋታ ከመጫወትዎ በፊት አዲሱን እትም እንዲቀበሉ ይጠየቃሉ።'] },
+    { h: '16. ተጠያቂነት', p: ['ኪንግ ሳፋሪ የሚቀርበው ባለበት ሁኔታ ነው። ሕጉ በሚፈቅደው መጠን ለእርስዎ ያለብን ጠቅላላ ተጠያቂነት በመለያዎ ውስጥ ባሉ ወጪ የሚደረጉ ቶከኖች ዋጋ የተወሰነ ነው። በተለይም በኢንተርኔት፣ በሞባይል ኔትወርክ፣ በኤሌክትሪክ ኃይል ወይም በመሣሪያ ብልሽት፣ በኔትወርክ አቅራቢዎ፣ ወይም ከምክንያታዊ ቁጥጥራችን ውጭ በሆኑ ክስተቶች ምክንያት ለሚደርስ ኪሳራ ተጠያቂ አይደለንም። በዚህ ውል ውስጥ ያለ ምንም ነገር በኢትዮጵያ ሕግ ሊገደብ የማይችልን ተጠያቂነት አይገድብም።'] },
+    { h: '17. ቅሬታዎች እና የሚገዛው ሕግ', p: ['ማንኛውንም ቅሬታ ለ{support} ያሳውቁ። በ5 የሥራ ቀናት ውስጥ ምላሽ እንሰጣለን። ይህ ውል የሚገዛው በኢትዮጵያ ፌዴራላዊ ዴሞክራሲያዊ ሪፐብሊክ ሕጎች ሲሆን አለመግባባቶች በአዲስ አበባ ፍርድ ቤቶች ይታያሉ።'] },
+    { h: '18. አድራሻ', p: ['{operator} · {support}'] }
   ] }
 };
 
 const PRIVACY = {
-  version: 4, effective: '2026-10-12',
+  version: 5, effective: '2026-11-12',
   en: { title: 'Privacy Policy', sections: [
     { h: '1. Who is responsible', p: ['{operator} is the controller of your personal data under the Personal Data Protection Proclamation No. 1321/2024. Contact: {support}.'] },
     { h: '2. What we collect', list: [
@@ -1841,7 +1897,8 @@ const PRIVACY = {
       'Fair-play and security signals: a random device ID, leaving the app or switching windows during your turn, other King Safari tabs, sign-in attempts, and a scrambled (hashed) form of your IP address.',
       'Messages you send to support, and technical error reports from the app.',
       'If you sign in through the telebirr Game Center: your telebirr open ID, your first name, your phone number if telebirr shares it, and your Game Center subscription status and expiry.',
-      'Names and messages our content rules refused: which field, the reason, and the first 80 characters, so our team can review them.'] },
+      'Names and messages our content rules refused: which field, the reason, and the first 80 characters, so our team can review them.',
+      'When you play online (ranked or Play Friends): what your opponent is shown about you (display name, animal, rating, and whether yours is a junior or an adult account) and the moves you play.'] },
     { h: '3. Why we use it', list: [
       'To run your account, your games and your wallet.',
       'To take payments and pay cash-outs through telebirr.',
@@ -1849,8 +1906,11 @@ const PRIVACY = {
       'To keep games fair: engine analysis, monitoring and reviews under the Fair Play & Anti-Cheating Policy.',
       'To answer your questions and keep King Safari secure and working.'] },
     { h: '4. Legal grounds', p: ['We process your data to perform our contract with you, to meet legal obligations, for our legitimate interest in fair and secure games, and with your consent where the law requires it.'] },
-    { h: '5. Who we share it with', p: ['Only as needed: Ethio Telecom (telebirr payments, SMS, and Game Center sign-in and subscription checks), our SMS provider, our hosting provider in Ethiopia, and authorities when the law requires it. We never sell your data and never show your phone number to other players.'] },
-    { h: '6. Where it is stored', p: ['Your data is stored on servers in Ethiopia.'] },
+    { h: '5. Who we share it with', p: ['Only as needed: Ethio Telecom (telebirr payments, SMS, and Game Center sign-in and subscription checks), our SMS provider, our hosting provider in Ethiopia, and authorities when the law requires it. We never sell your data and never show your phone number to other players.',
+        'Your opponents: in an online game your opponent sees your display name, animal and rating, never your phone number, date of birth or balance.',
+        'Online games in the practice version: the stand-alone practice version has no King Safari server, so an online game connects your phone directly to your opponent\'s phone through PeerJS (WebRTC). The PeerJS signalling and relay servers, which may be outside Ethiopia, only help the two phones find and reach each other. As in most online games, each phone can see the other\'s network (IP) address. Only the details listed above and the moves are sent, and PeerJS is contacted only after you start an online game or make a friend code.',
+        'Content networks: the app\'s fonts and code libraries are delivered by Google Fonts, cdnjs (Cloudflare), unpkg and jsDelivr, which receive your IP address when they send them. They are not given anything else about you.'] },
+    { h: '6. Where it is stored', p: ['Your data is stored on servers in Ethiopia. The practice version keeps your account only in the browser on your own device. The services named in section 5 that connect phones or deliver the app may handle your IP address outside Ethiopia, only for that purpose and only for as long as the connection lasts.'] },
     { h: '7. How long we keep it', list: [
       'Account data: while your account is open.',
       'Financial records (purchases, stakes, cash-outs): as long as financial record-keeping law requires.',
@@ -1866,7 +1926,7 @@ const PRIVACY = {
       'We check age from the date of birth given at sign-up, and confirm consent with a code sent by SMS to the parent or guardian.',
       'We collect only what a junior account needs: phone number, display name, animal, settings, date of birth, lessons and practice games, and the parent or guardian\'s contact.',
       'We never use a junior\'s data for marketing or advertising, never build profiles of juniors, and never combine their data with other profiles.',
-      'Junior accounts do not appear on leaderboards. They can play other people only through Play Friends: with another junior account they invited with a code. That friend sees only the display name and animal, and there is no chat.',
+      'Junior accounts do not appear on leaderboards. They can play other people only through Play Friends: with another junior account they invited with a code. Junior and adult accounts are never matched with each other. That friend sees only the display name and animal (and, in the practice version, the network address described in section 5), and there is no chat.',
       'If consent is not given within {consentDays} days, we close the account and erase its name, settings and the parent\'s contact. A parent or guardian can ask us at any time to do the same: write to {support}.'] },
     { h: '11. Changes', p: ['We will ask you to accept any new version of this policy in the app.'] }
   ] },
@@ -1882,7 +1942,8 @@ const PRIVACY = {
       'የፍትሃዊ ጨዋታ እና የደህንነት ምልክቶች፦ የዘፈቀደ የመሣሪያ መለያ፣ በተራዎ ጊዜ መተግበሪያውን መልቀቅ ወይም መስኮት መቀየር፣ ሌሎች የኪንግ ሳፋሪ ትሮች፣ የመግቢያ ሙከራዎች እና የተመሰጠረ የአይፒ አድራሻዎ።',
       'ለድጋፍ የሚልኳቸው መልእክቶች እና ከመተግበሪያው የሚመጡ የቴክኒክ ስህተት ሪፖርቶች።',
       'በቴሌብር ጌም ሴንተር በኩል ከገቡ፦ የቴሌብር ኦፕን አይዲዎ፣ የመጀመሪያ ስምዎ፣ ቴሌብር ካጋራ ስልክ ቁጥርዎ፣ እና የጌም ሴንተር ምዝገባዎ ሁኔታ እና የሚያበቃበት ጊዜ።',
-      'የይዘት ደንቦቻችን ውድቅ ያደረጓቸው ስሞች እና መልእክቶች፦ የትኛው ቦታ፣ ምክንያቱ እና የመጀመሪያዎቹ 80 ፊደላት፣ ቡድናችን እንዲገመግማቸው።'] },
+      'የይዘት ደንቦቻችን ውድቅ ያደረጓቸው ስሞች እና መልእክቶች፦ የትኛው ቦታ፣ ምክንያቱ እና የመጀመሪያዎቹ 80 ፊደላት፣ ቡድናችን እንዲገመግማቸው።',
+      'በመስመር ላይ ሲጫወቱ (የደረጃ ጨዋታ ወይም ከጓደኞች ጋር)፦ ተጋጣሚዎ ስለእርስዎ የሚያየው (የሚታይ ስም፣ እንስሳ፣ የደረጃ ነጥብ፣ እና መለያዎ የታዳጊ ወይም የአዋቂ መሆኑ) እና የሚጫወቷቸው እንቅስቃሴዎች።'] },
     { h: '3. ለምን እንጠቀምበታለን', list: [
       'መለያዎን፣ ጨዋታዎችዎን እና ቦርሳዎን ለማስኬድ።',
       'በቴሌብር ክፍያዎችን ለመቀበል እና ወጪዎችን ለመክፈል።',
@@ -1890,8 +1951,11 @@ const PRIVACY = {
       'ጨዋታዎችን ፍትሃዊ ለማድረግ፦ በፍትሃዊ ጨዋታ እና ፀረ-ማጭበርበር ፖሊሲው መሠረት የኢንጂን ትንተና፣ ክትትል እና ግምገማ።',
       'ጥያቄዎችዎን ለመመለስ እና ኪንግ ሳፋሪን ደህንነቱ የተጠበቀ እና የሚሠራ ለማድረግ።'] },
     { h: '4. ሕጋዊ መሠረቶች', p: ['መረጃዎን የምናስኬደው ከእርስዎ ጋር ያለንን ውል ለመፈጸም፣ ሕጋዊ ግዴታዎችን ለመወጣት፣ ፍትሃዊ እና ደህንነቱ የተጠበቀ ጨዋታ እንዲኖር ባለን ሕጋዊ ፍላጎት፣ እና ሕጉ በሚጠይቅበት ቦታ በእርስዎ ፈቃድ ነው።'] },
-    { h: '5. ለማን እናጋራለን', p: ['በሚያስፈልግ መጠን ብቻ፦ ለኢትዮ ቴሌኮም (የቴሌብር ክፍያ፣ ኤስኤምኤስ፣ እና የጌም ሴንተር መግቢያ እና የምዝገባ ፍተሻ)፣ ለኤስኤምኤስ አቅራቢያችን፣ በኢትዮጵያ ላለው የማስተናገጃ አቅራቢያችን፣ እና ሕጉ ሲጠይቅ ለባለሥልጣናት። መረጃዎን በፍጹም አንሸጥም፣ ስልክ ቁጥርዎንም ለሌሎች ተጫዋቾች አናሳይም።'] },
-    { h: '6. የሚቀመጥበት ቦታ', p: ['መረጃዎ የሚቀመጠው በኢትዮጵያ በሚገኙ አገልጋዮች ላይ ነው።'] },
+    { h: '5. ለማን እናጋራለን', p: ['በሚያስፈልግ መጠን ብቻ፦ ለኢትዮ ቴሌኮም (የቴሌብር ክፍያ፣ ኤስኤምኤስ፣ እና የጌም ሴንተር መግቢያ እና የምዝገባ ፍተሻ)፣ ለኤስኤምኤስ አቅራቢያችን፣ በኢትዮጵያ ላለው የማስተናገጃ አቅራቢያችን፣ እና ሕጉ ሲጠይቅ ለባለሥልጣናት። መረጃዎን በፍጹም አንሸጥም፣ ስልክ ቁጥርዎንም ለሌሎች ተጫዋቾች አናሳይም።',
+        'ተጋጣሚዎችዎ፦ በመስመር ላይ ጨዋታ ተጋጣሚዎ የሚያየው የሚታይ ስምዎን፣ እንስሳዎን እና የደረጃ ነጥብዎን ብቻ ነው፤ ስልክ ቁጥርዎን፣ የትውልድ ቀንዎን ወይም ሂሳብዎን በፍጹም አያይም።',
+        'በልምምድ እትሙ የመስመር ላይ ጨዋታዎች፦ ራሱን የቻለው የልምምድ እትም የኪንግ ሳፋሪ አገልጋይ የለውም፤ ስለዚህ የመስመር ላይ ጨዋታ ስልክዎን በPeerJS (WebRTC) በኩል ከተጋጣሚዎ ስልክ ጋር በቀጥታ ያገናኛል። ከኢትዮጵያ ውጭ ሊሆኑ የሚችሉት የPeerJS አገናኝ እና ማስተላለፊያ አገልጋዮች ሁለቱ ስልኮች እንዲገናኙ ብቻ ይረዳሉ። እንደ አብዛኞቹ የመስመር ላይ ጨዋታዎች፣ እያንዳንዱ ስልክ የሌላውን የኔትወርክ (IP) አድራሻ ማየት ይችላል። የሚላከው ከላይ የተዘረዘረው መረጃ እና እንቅስቃሴዎቹ ብቻ ነው፣ PeerJS የሚገናኘውም የመስመር ላይ ጨዋታ ከጀመሩ ወይም የጓደኛ ኮድ ከፈጠሩ በኋላ ብቻ ነው።',
+        'የይዘት ማድረሻ አውታሮች፦ የመተግበሪያው ፊደላት እና የኮድ ቤተ-መጻሕፍት የሚደርሱት በGoogle Fonts፣ cdnjs (Cloudflare)፣ unpkg እና jsDelivr በኩል ነው፤ እነዚህም ሲልኩ የIP አድራሻዎን ይቀበላሉ። ስለእርስዎ ሌላ ምንም አይሰጣቸውም።'] },
+    { h: '6. የሚቀመጥበት ቦታ', p: ['መረጃዎ የሚቀመጠው በኢትዮጵያ በሚገኙ አገልጋዮች ላይ ነው። የልምምድ እትሙ መለያዎን የሚያስቀምጠው በራስዎ መሣሪያ ላይ ባለው አሳሽ ውስጥ ብቻ ነው። በክፍል 5 የተጠቀሱት ስልኮችን የሚያገናኙ ወይም መተግበሪያውን የሚያደርሱ አገልግሎቶች የIP አድራሻዎን ከኢትዮጵያ ውጭ ሊያስተናግዱ ይችላሉ፤ ለዚያ ዓላማ ብቻ እና ግንኙነቱ እስካለ ድረስ ብቻ።'] },
     { h: '7. ለምን ያህል ጊዜ እናስቀምጣለን', list: [
       'የመለያ መረጃ፦ መለያዎ ክፍት እስከሆነ ድረስ።',
       'የገንዘብ መዝገቦች (ግዢዎች፣ ውርርዶች፣ ወጪዎች)፦ የገንዘብ መዝገብ ሕግ እስከሚጠይቀው ጊዜ ድረስ።',
@@ -1907,7 +1971,7 @@ const PRIVACY = {
       'ዕድሜን የምናረጋግጠው በምዝገባ ወቅት ከተሰጠው የትውልድ ቀን ሲሆን፣ ፈቃዱን ደግሞ ለወላጁ ወይም ለአሳዳጊው በኤስኤምኤስ በሚላክ ኮድ እናረጋግጣለን።',
       'የምንሰበስበው የታዳጊ መለያ የሚያስፈልገውን ብቻ ነው፦ ስልክ ቁጥር፣ የሚታይ ስም፣ እንስሳ፣ ቅንብሮች፣ የትውልድ ቀን፣ ትምህርቶች እና የልምምድ ጨዋታዎች፣ እንዲሁም የወላጅ ወይም የአሳዳጊ አድራሻ።',
       'የታዳጊን መረጃ ለገበያ ወይም ለማስታወቂያ በፍጹም አንጠቀምም፣ ስለ ታዳጊዎች መገለጫ አንገነባም፣ መረጃቸውንም ከሌሎች መገለጫዎች ጋር አናዋህድም።',
-      'የታዳጊ መለያዎች በደረጃ ሰንጠረዥ ላይ አይታዩም። ከሌሎች ሰዎች ጋር መጫወት የሚችሉት በ"ከጓደኞች ጋር ተጫወት" ብቻ ነው፦ በኮድ ከጋበዙት ሌላ የታዳጊ መለያ ጋር። ያ ጓደኛ የሚያየው የሚታይ ስምና እንስሳ ብቻ ነው፣ የጽሑፍ መልእክትም የለም።',
+      'የታዳጊ መለያዎች በደረጃ ሰንጠረዥ ላይ አይታዩም። ከሌሎች ሰዎች ጋር መጫወት የሚችሉት በ"ከጓደኞች ጋር ተጫወት" ብቻ ነው፦ በኮድ ከጋበዙት ሌላ የታዳጊ መለያ ጋር። የታዳጊ እና የአዋቂ መለያዎች በፍጹም አይገናኙም። ያ ጓደኛ የሚያየው የሚታይ ስምና እንስሳ ብቻ ነው (በልምምድ እትሙ ደግሞ በክፍል 5 የተገለጸውን የኔትወርክ አድራሻ)፣ የጽሑፍ መልእክትም የለም።',
       'ፈቃድ በ{consentDays} ቀናት ውስጥ ካልተሰጠ፣ መለያውን እንዘጋለን፣ ስሙን፣ ቅንብሮቹን እና የወላጁን አድራሻ እንሰርዛለን። ወላጅ ወይም አሳዳጊ በማንኛውም ጊዜ ይህንኑ እንድናደርግ መጠየቅ ይችላሉ፦ ለ{support} ይጻፉ።'] },
     { h: '11. ለውጦች', p: ['የዚህን ፖሊሲ ማንኛውንም አዲስ እትም በመተግበሪያው ውስጥ እንዲቀበሉ እንጠይቅዎታለን።'] }
   ] }
@@ -1916,7 +1980,7 @@ const PRIVACY = {
 /* The connection rules every player accepts (with a checkbox) before their first ranked match. Stored per version
    in policy_acceptances (document 'connection'); raising `version` asks everyone again. */
 const CONNECTION = {
-  version: 1,
+  version: 2,
   en: { title: 'Connection rules for ranked matches',
     intro: 'Ranked matches are played live for real tokens. Read these rules before your first match.',
     points: [
@@ -1926,7 +1990,10 @@ const CONNECTION = {
       'Your clock keeps running while you are disconnected. If it runs out first, you lose on time.',
       'The same rule protects you: if your opponent disconnects and does not return in time, you win.',
       'King Safari is not responsible for your internet, mobile network, data, device, battery or power. A match lost through a problem on your side is not replayed, refunded or compensated.',
-      'Disconnecting on purpose is a fair-play violation.'],
+      'Disconnecting on purpose is a fair-play violation.',
+      'A ranked match cannot be paused or left to come back to later. Leaving a match in progress means resigning; only a dropped internet connection gets the {grace} seconds.',
+      'Resigning, or not coming back in time after a lost connection, also costs 5 XP.',
+      'In the practice version your phone connects directly to your opponent\'s phone, and each can see the other\'s network (IP) address. See the Privacy Policy, section 5.'],
     agree: 'I accept these connection rules. I understand that King Safari is not responsible for my connection, device or power, and that if I do not reconnect in time I forfeit the match.' },
   am: { title: 'የውድድር ጨዋታ የግንኙነት ደንቦች',
     intro: 'የውድድር ጨዋታዎች በእውነተኛ ቶከን በቀጥታ ይጫወታሉ። ከመጀመሪያ ጨዋታዎ በፊት እነዚህን ደንቦች ያንብቡ።',
@@ -1937,7 +2004,10 @@ const CONNECTION = {
       'ግንኙነትዎ ተቋርጦ ሳለ ሰዓትዎ መሮጡን ይቀጥላል። ቀድሞ ካለቀ በሰዓት ይሸነፋሉ።',
       'ይኸው ደንብ እርስዎንም ይጠብቃል፦ ተጋጣሚዎ ግንኙነቱ ተቋርጦ በጊዜው ካልተመለሰ እርስዎ ያሸንፋሉ።',
       'ኪንግ ሳፋሪ ለኢንተርኔትዎ፣ ለሞባይል ኔትወርክዎ፣ ለዳታዎ፣ ለመሣሪያዎ፣ ለባትሪዎ ወይም ለኤሌክትሪክ ኃይልዎ ኃላፊነት የለበትም። በእርስዎ በኩል ባለ ችግር የተሸነፉበት ጨዋታ በድጋሚ አይደረግም፣ ገንዘብ አይመለስም፣ ካሳም አይከፈልም።',
-      'ሆን ብሎ ግንኙነትን ማቋረጥ የፍትሃዊ ጨዋታ ጥሰት ነው።'],
+      'ሆን ብሎ ግንኙነትን ማቋረጥ የፍትሃዊ ጨዋታ ጥሰት ነው።',
+      'የደረጃ ጨዋታ ሊቆም ወይም በኋላ ለመመለስ ሊተው አይችልም። እየተካሄደ ያለን ጨዋታ መልቀቅ እጅ እንደመስጠት ይቆጠራል፤ {grace} ሰከንዱ የሚሰጠው የኢንተርኔት ግንኙነት ሲቋረጥ ብቻ ነው።',
+      'እጅ መስጠት፣ ወይም ግንኙነት ተቋርጦ በጊዜው አለመመለስ 5 XP ያስቀንሳል።',
+      'በልምምድ እትሙ ስልክዎ ከተጋጣሚዎ ስልክ ጋር በቀጥታ ይገናኛል፣ እያንዳንዳቸውም የሌላውን የኔትወርክ (IP) አድራሻ ማየት ይችላሉ። የግላዊነት ፖሊሲውን ክፍል 5 ይመልከቱ።'],
     agree: 'እነዚህን የግንኙነት ደንቦች እቀበላለሁ። ኪንግ ሳፋሪ ለግንኙነቴ፣ ለመሣሪያዬ ወይም ለኤሌክትሪክ ኃይሌ ኃላፊነት እንደሌለበት፣ እና በጊዜው እንደገና ካልተገናኘሁ ጨዋታውን እንደምሸነፍ ተረድቻለሁ።' }
 };
 
@@ -3710,6 +3780,77 @@ window.AM_PATTERNS = [
 ];
 
 </script>
+<script>/* public/js/i18n-am-v12.js */
+/* Copyright (c) 2026 Abbel Dawit. All rights reserved. King Safari — proprietary and confidential; see LICENSE and NOTICE. */
+/* Amharic for the text added in v1.2 (online play, friendly games for adults, levels to 999, three-in-a-row lessons).
+   Same rules as i18n-am.js; a native Amharic speaker should review these before launch. */
+Object.assign(window.AM_STRINGS, {
+ "Flip": "ገልብጥ",
+ "Clock: {t}": "ሰዓት፦ {t}",
+ "Connecting…": "በማገናኘት ላይ…",
+ "Resigning costs {n} XP.": "እጅ መስጠት {n} XP ያስቀንሳል።",
+ "A ranked match cannot be paused or left for later. Resigning also costs {n} XP.": "የደረጃ ጨዋታ ሊቆም ወይም ለበኋላ ሊተው አይችልም። እጅ መስጠት {n} XP ያስቀንሳል።",
+ "Top level reached": "ከፍተኛው ደረጃ ላይ ደርሰዋል",
+ "Friendly games": "የወዳጅነት ጨዋታዎች",
+ "Friendly games: no tokens, no rating": "የወዳጅነት ጨዋታዎች፦ ቶከን የለም፣ የደረጃ ነጥብ የለም",
+ "Free practice": "ነፃ ልምምድ",
+ "Free practice: keep moving your own pieces as much as you like. Tap Reset the position to start over.": "ነፃ ልምምድ፦ የራስዎን ጠጠሮች የፈለጉትን ያህል ማንቀሳቀስ ይቀጥሉ። እንደገና ለመጀመር \"ቦታውን ዳግም አስጀምር\"ን ይንኩ።",
+ "No more moves for white here. Tap Reset the position to start over.": "እዚህ ለነጭ ተጨማሪ እንቅስቃሴ የለም። እንደገና ለመጀመር \"ቦታውን ዳግም አስጀምር\"ን ይንኩ።",
+ "Show you understand: make {n} correct moves in a row. A wrong move starts the count again.": "መረዳትዎን ያሳዩ፦ {n} ትክክለኛ እንቅስቃሴዎችን በተከታታይ ያድርጉ። የተሳሳተ እንቅስቃሴ ቆጠራውን እንደገና ያስጀምራል።",
+ "Show you understand: make the winning moves.": "መረዳትዎን ያሳዩ፦ የሚያሸንፉትን እንቅስቃሴዎች ያድርጉ።",
+ "Start again: {n} correct moves in a row.": "እንደገና ይጀምሩ፦ {n} ትክክለኛ እንቅስቃሴዎች በተከታታይ።",
+ "Correct! {n} of {total} in a row. Here is the next one.": "ትክክል! ከ{total} {n} በተከታታይ። ቀጣዩ ይኸውና።",
+ "{n} of {total} in a row": "ከ{total} {n} በተከታታይ",
+ "Capture the black pawn on f4 with your pawn.": "በf4 ያለውን ጥቁር ወታደር በወታደርዎ ይብሉት።",
+ "Capture the black pawn on c6 with your pawn.": "በc6 ያለውን ጥቁር ወታደር በወታደርዎ ይብሉት።",
+ "Only one black pawn is on a diagonal from f1. Capture it.": "ከf1 በሰያፍ ላይ ያለው አንድ ጥቁር ወታደር ብቻ ነው። ይብሉት።",
+ "Only one black pawn is on a diagonal from d2. Capture it.": "ከd2 በሰያፍ ላይ ያለው አንድ ጥቁር ወታደር ብቻ ነው። ይብሉት።",
+ "Capture one of the black pawns with the queen.": "ከጥቁር ወታደሮቹ አንዱን በንግሥቲቱ ይብሉ።",
+ "Castle on the queen side: tap the king on e1, then tap c1.": "በንግሥቲቱ በኩል ቆስጠንጢኖስ ያድርጉ፦ በe1 ያለውን ንጉሥ ይንኩ፣ ከዚያ c1ን ይንኩ።",
+ "That is a normal king move. To castle, move the king two squares, from e1 to c1.": "ይህ የተለመደ የንጉሥ እንቅስቃሴ ነው። ቆስጠንጢኖስ ለማድረግ ንጉሡን ሁለት አደባባይ ከe1 ወደ c1 ያንቀሳቅሱ።",
+ "Castle on either side: move the king two squares toward a rook.": "በየትኛውም በኩል ቆስጠንጢኖስ ያድርጉ፦ ንጉሡን ወደ አንዱ ግንብ ሁለት አደባባይ ያንቀሳቅሱ።",
+ "That is a normal king move. To castle, move the king two squares toward a rook.": "ይህ የተለመደ የንጉሥ እንቅስቃሴ ነው። ቆስጠንጢኖስ ለማድረግ ንጉሡን ወደ ግንቡ ሁለት አደባባይ ያንቀሳቅሱ።",
+ "Bring the queen to the back row.": "ንግሥቲቱን ወደ መጨረሻው ረድፍ ያምጡ።",
+ "The black bishop on d5 is attacked by your knight and nothing defends it. Capture it.": "በd5 ያለው ጥቁር ጳጳስ በፈረስዎ ተጠቅቷል፣ የሚከላከለውም የለም። ይብሉት።",
+ "That leaves the free bishop on the board. Take it.": "ይህ ነፃውን ጳጳስ በሰሌዳው ላይ ይተዋል። ይውሰዱት።",
+ "The black knight on f6 is attacked by your bishop and nothing defends it. Capture it.": "በf6 ያለው ጥቁር ፈረስ በጳጳስዎ ተጠቅቷል፣ የሚከላከለውም የለም። ይብሉት።",
+ "Jump to the square that attacks both f8 and b8.": "f8ንም b8ንም ወደሚያጠቃው አደባባይ ይዝለሉ።",
+ "The king has stepped out of check. Now capture the rook on b8.": "ንጉሡ ከቼክ ወጥቷል። አሁን በb8 ያለውን ግንብ ይብሉ።",
+ "The rook is still there for the taking. Capture it on b8.": "ግንቡ አሁንም ለመበላት ዝግጁ ነው። በb8 ይብሉት።",
+ "Jump over the black man on f4 and land on g5.": "በf4 ያለውን ጥቁር ጠጠር ዘልለው g5 ላይ ያርፉ።",
+ "Jump over the black man on e3 and land on d4.": "በe3 ያለውን ጥቁር ጠጠር ዘልለው d4 ላይ ያርፉ።",
+ "Jump to e5, then carry on over the man on d6 to c7.": "ወደ e5 ይዝለሉ፣ ከዚያ በd6 ያለውን ጠጠር ዘልለው ወደ c7 ይቀጥሉ።",
+ "Jump to c3, then carry on over the man on d4 to e5.": "ወደ c3 ይዝለሉ፣ ከዚያ በd4 ያለውን ጠጠር ዘልለው ወደ e5 ይቀጥሉ።",
+ "Move your man to the last row.": "ጠጠርዎን ወደ መጨረሻው ረድፍ ያንቀሳቅሱ።",
+ "Jump backwards over the man on d4.": "በd4 ያለውን ጠጠር ወደ ኋላ ዘልለው ይብሉ።",
+ "Jump backwards over the man on g3.": "በg3 ያለውን ጠጠር ወደ ኋላ ዘልለው ይብሉ።",
+ "Black captured the pawn. Keep your king next to it. Try again.": "ጥቁር ወታደሩን በላው። ንጉሥዎን ከወታደሩ አጠገብ ያቆዩ። እንደገና ይሞክሩ።",
+ "Black has no legal moves left, so the position is finished. Try again.": "ጥቁር ሕጋዊ እንቅስቃሴ የለውም፣ ስለዚህ ቦታው አልቋል። እንደገና ይሞክሩ።",
+ "That is stalemate: black cannot move, so the game is a draw. Try again.": "ይህ ፓት ነው፦ ጥቁር መንቀሳቀስ አይችልም፣ ስለዚህ ጨዋታው አቻ ነው። እንደገና ይሞክሩ።",
+ "The pawn is gone, so white can no longer win. Try again.": "ወታደሩ ጠፍቷል፣ ስለዚህ ነጭ ከእንግዲህ ማሸነፍ አይችልም። እንደገና ይሞክሩ።",
+ "Junior accounts can only play with junior accounts, and adult accounts with adult accounts.": "የታዳጊ መለያዎች መጫወት የሚችሉት ከታዳጊ መለያዎች ጋር ብቻ ነው፣ የአዋቂ መለያዎችም ከአዋቂ መለያዎች ጋር ብቻ።",
+ "Nobody is waiting with that code. Check it with your friend, or ask them for a new one.": "በዚያ ኮድ የሚጠብቅ ማንም የለም። ከጓደኛዎ ጋር ያረጋግጡ፣ ወይም አዲስ ኮድ ይጠይቋቸው።",
+ "Your friend is already in a game.": "ጓደኛዎ አስቀድሞ ጨዋታ ላይ ነው።",
+ "{name} has left.": "{name} ወጥተዋል።",
+ "Online: your friend can join from their own phone, wherever they are.": "በመስመር ላይ፦ ጓደኛዎ የትም ቢሆኑ ከራሳቸው ስልክ መቀላቀል ይችላሉ።",
+ "Online play could not start on this connection, so friends cannot join this code from another phone right now.": "በዚህ ግንኙነት የመስመር ላይ ጨዋታ መጀመር አልተቻለም፣ ስለዚህ ጓደኞች አሁን ከሌላ ስልክ በዚህ ኮድ መቀላቀል አይችሉም።",
+ "Looking for real players online at this table. Keep this screen open: the match starts as soon as someone near your rating joins.": "በዚህ ጠረጴዛ በመስመር ላይ እውነተኛ ተጫዋቾችን በመፈለግ ላይ። ይህን ገጽ ክፍት ያድርጉ፦ የእርስዎ ደረጃ አካባቢ ያለ ሰው እንደተቀላቀለ ጨዋታው ይጀምራል።",
+ "Online play cannot be reached from here right now, so your opponent is the practice computer.": "የመስመር ላይ ጨዋታ ከዚህ አሁን ሊደረስበት አልቻለም፣ ስለዚህ ተጋጣሚዎ የልምምድ ኮምፒውተሩ ነው።",
+ "Online play is not available on this device or connection, so your opponent is the practice computer.": "በዚህ መሣሪያ ወይም ግንኙነት የመስመር ላይ ጨዋታ የለም፣ ስለዚህ ተጋጣሚዎ የልምምድ ኮምፒውተሩ ነው።",
+ "Play the practice opponent (computer) instead": "በምትኩ ከልምምድ ተጋጣሚው (ኮምፒውተር) ጋር ይጫወቱ",
+ "Find an opponent looks for real players online, phone to phone, with demo tokens only. If nobody near your rating is online, you can choose the practice computer instead.": "\"ተጋጣሚ ፈልግ\" በማሳያ ቶከኖች ብቻ፣ ከስልክ ወደ ስልክ፣ በመስመር ላይ እውነተኛ ተጫዋቾችን ይፈልጋል። በእርስዎ ደረጃ አካባቢ በመስመር ላይ ማንም ከሌለ፣ በምትኩ የልምምድ ኮምፒውተሩን መምረጥ ይችላሉ።",
+ "Play only with friends you know. Share your code with them, not in public groups. Junior accounts play only with junior accounts, and adult accounts only with adult accounts. Friendly games have no tokens, no rating and no chat.": "ከሚያውቋቸው ጓደኞች ጋር ብቻ ይጫወቱ። ኮድዎን ለእነሱ ያጋሩ እንጂ በሕዝብ ቡድኖች ውስጥ አይደለም። የታዳጊ መለያዎች የሚጫወቱት ከታዳጊ መለያዎች ጋር ብቻ፣ የአዋቂ መለያዎችም ከአዋቂ መለያዎች ጋር ብቻ ነው። የወዳጅነት ጨዋታዎች ቶከን፣ የደረጃ ነጥብ እና የጽሑፍ መልእክት የላቸውም።",
+ "Practice version: no real money. Only online games connect to other players.": "የልምምድ እትም፦ እውነተኛ ገንዘብ የለም። ከሌሎች ተጫዋቾች ጋር የሚያገናኙት የመስመር ላይ ጨዋታዎች ብቻ ናቸው።",
+ "no friend nearby to try it with? Let a pretend friend (the computer) join instead.": "አብሮ የሚሞክር ጓደኛ አጠገብዎ የለም? በምትኩ አስመሳይ ጓደኛ (ኮምፒውተሩ) ይቀላቀል።",
+ "Can I leave a game and come back?": "ከጨዋታ ወጥቼ መመለስ እችላለሁ?",
+ "In Play Friends, bots and pass-and-play, yes: leave from the game screen and come back from the home screen. A ranked match cannot be paused or left for later; the only way out is to resign. If your internet connection drops, you have {n} seconds to reconnect.": "በ\"ከጓደኞች ጋር ተጫወት\"፣ በቦቶች እና በአንድ ስልክ ተቀባብሎ በመጫወት፣ አዎ፦ ከጨዋታው ገጽ ይውጡ፣ ከመነሻ ገጹም ይመለሱ። የደረጃ ጨዋታ ሊቆም ወይም ለበኋላ ሊተው አይችልም፤ መውጫው እጅ መስጠት ብቻ ነው። የኢንተርኔት ግንኙነትዎ ከተቋረጠ፣ እንደገና ለመገናኘት {n} ሰከንድ አለዎት።",
+ "How do levels work?": "ደረጃዎች እንዴት ይሠራሉ?",
+ "Every 50 XP is a new level, up to level 999. Winning a game earns 5 XP. Losing or a draw earns nothing. Resigning, or losing a connection and not coming back in time, costs 5 XP. Finishing a lesson earns XP too.": "እያንዳንዱ 50 XP አዲስ ደረጃ ነው፣ እስከ ደረጃ 999። ጨዋታ ማሸነፍ 5 XP ያስገኛል። መሸነፍ ወይም አቻ ምንም አያስገኝም። እጅ መስጠት፣ ወይም ግንኙነት ተቋርጦ በጊዜው አለመመለስ 5 XP ያስቀንሳል። ትምህርት መጨረስም XP ያስገኛል።",
+ "Tap Play Friends, make a code and let your friend scan the QR code, or send them the link. When they join, the game starts on both phones, wherever you both are. Friendly games have no tokens and no rating. Junior accounts play only with junior accounts, adult accounts only with adult accounts, and there is no chat.": "\"ከጓደኞች ጋር ተጫወት\"ን ይንኩ፣ ኮድ ይፍጠሩ፣ ጓደኛዎ የQR ኮዱን እንዲቃኙ ያድርጉ ወይም ሊንኩን ይላኩላቸው። ሲቀላቀሉ ሁለታችሁም የትም ብትሆኑ ጨዋታው በሁለቱም ስልኮች ላይ ይጀምራል። የወዳጅነት ጨዋታዎች ቶከን እና የደረጃ ነጥብ የላቸውም። የታዳጊ መለያዎች ከታዳጊ መለያዎች ጋር ብቻ፣ የአዋቂ መለያዎችም ከአዋቂ መለያዎች ጋር ብቻ ይጫወታሉ፣ የጽሑፍ መልእክትም የለም።",
+ "Player": "ተጫዋች"
+});
+
+</script>
 <script>/* public/js/i18n.js */
 /* Copyright (c) 2026 Abbel Dawit. All rights reserved. King Safari — proprietary and confidential; see LICENSE and NOTICE. */
 /* King Safari — languages (English and Amharic) and the Ethiopian calendar.
@@ -4368,7 +4509,7 @@ const LocalBackend = {
   _me(){ const ph = lsGet(LK.session, null); return ph ? this._all()[ph] || null : null; },
   _need(){ const a = this._me(); if (!a) throw err('Your session ended. Sign in again.', 401); return a; },
   _save(a){ const all = this._all(); all[a.phone] = a; lsSet(LK.accounts, all); },
-  _pub(a){ const { tx, matches, active, reports, limits, tickets, kycSub, guardianPending, ...p } = a;
+  _pub(a){ Rules.normalizeLevel(a); const { tx, matches, active, reports, limits, tickets, kycSub, guardianPending, ...p } = a;
     const excluded = a.excludedUntil && new Date(a.excludedUntil) > new Date();
     return { bonus: 0, ...p, fairPlayAccepted: (a.fairPlayVersion || 0) >= Policy.VERSION, connectionAccepted: (a.connectionVersion || 0) >= Legal.CONNECTION.version, games: a.games,
       adult: a.birthDate ? Legal.ageOn(a.birthDate) >= Legal.MIN_AGE : null,
@@ -4561,6 +4702,7 @@ const LocalBackend = {
   async botResult(game, level, result){
     this._access(this._need(), 'play'); this._ready(this._need());
     const a = this._need(), st = this._stats(a, game), xp = Rules.botXP(level, result), ups = Rules.addXP(a, xp);
+    st.botG = (st.botG || 0) + 1;
     if (result === 'W') st.botW++;
     this._save(a); return { xp, levelsGained: ups, player: this._pub(a) };
   },
@@ -4802,10 +4944,11 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
     return { id: m.id, game: m.game || 'chess', status: m.status, my: m.my, stake: m.stake, pot: m.pot, opp: m.opp, moves: m.moves.slice(),
       turn: GAMES[m.game || 'chess'].turnOf(s),
       clock: { w: m.clock.w, b: m.clock.b, turnStartedAt: m.turnStartedAt, serverNow: Date.now() }, firstMoveBy: first,
-      drawOffer: null, endReason: m.endReason || null, ratingDelta: m.ratingDelta, oppOnline: !this.oppGone, oppGraceUntil: this.oppGone ? this.oppGone.until : null,
+      drawOffer: m.drawOffer || null, endReason: m.endReason || null, ratingDelta: m.ratingDelta, xp: m.xp, oppOnline: !this.oppGone, oppGraceUntil: this.oppGone ? this.oppGone.until : null,
       payout: m.status === 'won' ? m.pot : (m.status === 'drawn' || m.status === 'aborted') ? m.stake : 0 };
   },
   _push(a, m){
+    if (m.peer && m.status !== 'active' && this._session && this._session.id === m.id){ this._session.end(); this._session = null; clearTimeout(this._graceT); this.offline = false; this.oppGone = null; }
     LocalBackend._save(a);
     this.emit({ t: 'match', match: this._view(a, m), player: m.status !== 'active' ? LocalBackend._pub(a) : undefined });
   },
@@ -4826,7 +4969,8 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
       if (result === 'drawn') back('Draw — stake returned', m.stake - mb, mb);
       mine.rating = Math.max(400, mine.rating + delta); m.ratingDelta = delta;
       if (result === 'won') mine.w++; else if (result === 'drawn') mine.d++; else mine.l++;
-      Rules.addXP(a, Rules.rankedXP(result === 'won' ? 'W' : result === 'drawn' ? 'D' : 'L'));
+      m.xp = Rules.rankedXP(result === 'won' ? 'W' : result === 'drawn' ? 'D' : 'L', reason);
+      Rules.addXP(a, m.xp);
       a.matches.unshift({ game: m.game || 'chess', opp: m.opp.name, avatar: m.opp.avatar, result: {won:'W', lost:'L', drawn:'D'}[result], stake: m.stake, delta });
       a.matches = a.matches.slice(0, 25);
     }
@@ -4843,14 +4987,23 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
     this.tickT = setInterval(() => {
       const a = LocalBackend._me(), m = a && a.active; if (!m || m.status !== 'active') return clearInterval(this.tickT);
       const G = GAMES[m.game || 'chess'], turn = G.turnOf(G.replay(m.moves)), left = m.clock[turn] - (Date.now() - m.turnStartedAt);
-      if (m.moves.length < 2 && Date.now() > m.turnStartedAt + 30000){ this._settle(a, m, 'aborted', 'a player did not move in time'); return this._push(a, m); }
-      if (left <= 0){ this._charge(m); this._settle(a, m, turn === m.my ? 'lost' : 'won', 'time'); this._push(a, m); }
+      if (m.moves.length < 2 && Date.now() > m.turnStartedAt + 30000){
+        if (m.peer) this._psend({ t: 'abort' });
+        this._settle(a, m, 'aborted', 'a player did not move in time'); return this._push(a, m);
+      }
+      if (left <= 0){
+        if (m.peer){
+          if (turn !== m.my){ if (left > -3000) return; this._psend({ t: 'timeout' }); }   // a moment's grace for a move on its way
+          else this._psend({ t: 'flag' });
+        }
+        this._charge(m); this._settle(a, m, turn === m.my ? 'lost' : 'won', 'time'); this._push(a, m);
+      }
     }, 500);
   },
   _reply(){
     setTimeout(() => {
       const a = LocalBackend._me(), m = a && a.active;
-      if (!m || m.status !== 'active') return;
+      if (!m || m.status !== 'active' || m.peer) return;
       const G = GAMES[m.game || 'chess'], s = G.replay(m.moves); if (G.turnOf(s) === m.my) return;
       if (this.oppGone) return this._reply();                    // a disconnected opponent cannot move
       const mv = G.botMove(s, m.level);
@@ -4858,6 +5011,29 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
       this._ended(a, m, G.apply(s, mv)); this._push(a, m);
     }, 700 + Math.random() * 1500);
   },
+  /* the stake leaves the wallet when the match opens: bonus tokens first */
+  _stakeIt(a, m){
+    m.myBonus = Math.min(a.bonus || 0, m.stake);
+    if (m.myBonus) LocalBackend._bonus(a, -m.myBonus, 'Staked in a ranked match', 'vs ' + m.opp.name, 'stake');
+    if (m.stake - m.myBonus) LocalBackend._ledger(a, -(m.stake - m.myBonus), 'Staked in a ranked match', 'vs ' + m.opp.name);
+  },
+  /* the practice opponent (the computer), clearly marked as such */
+  _computerSoon(stake, game, ms){
+    clearTimeout(this.qTimer);
+    this.qTimer = setTimeout(() => {
+      const a = LocalBackend._me(); if (!a || (a.active && a.active.status === 'active')) return;
+      const mine = LocalBackend._stats(a, game);
+      const rating = Math.max(500, mine.rating + Math.round((Math.random() - .5) * 160));
+      const m = { id: 'local-' + Date.now(), game, status: 'active', my: Math.random() < .5 ? 'w' : 'b', stake, pot: stake * 2,
+        opp: { name: 'Practice opponent', avatar: '🤖', rating, computer: true }, level: Rules.levelForRating(rating),
+        moves: [], clock: { w: Rules.CLOCK_MS, b: Rules.CLOCK_MS }, turnStartedAt: Date.now() };
+      this._stakeIt(a, m);
+      a.active = m; LocalBackend._save(a); this._qStake = null;
+      this.emit({ t: 'matched', match: this._view(a, m) });
+      this._tick(); if (m.my === 'b') this._reply();
+    }, ms == null ? 1800 + Math.random() * 2200 : ms);
+  },
+  _stopSearch(){ this._qToken = null; clearTimeout(this.qTimer); if (this._search){ try{ this._search.cancel(); }catch(e){} this._search = null; } },
   queue(stake, game){
     game = game || 'chess';
     try{
@@ -4869,25 +5045,146 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
       if (a.active && a.active.status === 'active') throw err('You already have a ranked match in progress.', 409);
       LocalBackend._guard(a, 'ranked');
       LocalBackend._access(a, 'ranked');
+      this._stopSearch();
       this.emit({ t: 'conncheck', ok: true, quality: 'good', rtt: 60 + Math.round(Math.random() * 60), answered: 4, sent: 4 });
-      this.emit({ t: 'queued', stake, rating: a.rating });
-      clearTimeout(this.qTimer);
-      this.qTimer = setTimeout(() => {
-        const a = LocalBackend._need(), mine = LocalBackend._stats(a, game);
-        const rating = Math.max(500, mine.rating + Math.round((Math.random() - .5) * 160));
-        const m = { id: 'local-' + Date.now(), game, status: 'active', my: Math.random() < .5 ? 'w' : 'b', stake, pot: stake * 2,
-          opp: { name: 'Practice opponent', avatar: '🤖', rating, computer: true }, level: Rules.levelForRating(rating),
-          moves: [], clock: { w: Rules.CLOCK_MS, b: Rules.CLOCK_MS }, turnStartedAt: Date.now() };
-        m.myBonus = Math.min(a.bonus || 0, stake);                     // bonus tokens are used first
-        if (m.myBonus) LocalBackend._bonus(a, -m.myBonus, 'Staked in a ranked match', 'vs ' + m.opp.name, 'stake');
-        if (stake - m.myBonus) LocalBackend._ledger(a, -(stake - m.myBonus), 'Staked in a ranked match', 'vs ' + m.opp.name);
-        a.active = m; LocalBackend._save(a);
-        this.emit({ t: 'matched', match: this._view(a, m) });
-        this._tick(); if (m.my === 'b') this._reply();
-      }, 1800 + Math.random() * 2200);
+      this._qStake = { stake, game };
+      const token = this._qToken = {};
+      const me = { name: a.name, avatar: a.avatar, rating: mine.rating };
+      // real players first: look for someone at this table online, for as long as the player keeps the search open
+      P2P.load().then(ok => {
+        if (this._qToken !== token) return;
+        if (!ok){ this.emit({ t: 'queued', stake, rating: mine.rating, online: false }); return this._computerSoon(stake, game); }
+        this.emit({ t: 'queued', stake, rating: mine.rating, online: true });
+        const h = this._search = P2P.findMatch({ game, stake, me, maxGap: Rules.MATCH.MAX_GAP });
+        h.done.then(res => {
+          if (this._search !== h){ if (res) try{ res.conn.close(); }catch(e){} return; }
+          this._search = null;
+          if (res) this._startPeer(res, stake, game);
+        }).catch(() => {
+          if (this._search !== h) return;
+          this._search = null;
+          this.emit({ t: 'queued', stake, rating: mine.rating, online: false, failed: true });
+          this._computerSoon(stake, game);
+        });
+      });
     }catch(e){ this.emit({ t: 'unqueued', error: e.message, code: e.code }); }
   },
-  cancel(){ clearTimeout(this.qTimer); this.emit({ t: 'unqueued' }); },
+  /* the player chose the practice opponent instead of waiting for a person */
+  playComputer(){ const q = this._qStake; if (!q) return; this._stopSearch(); this._computerSoon(q.stake, q.game, 300); },
+  cancel(){ this._stopSearch(); this._qStake = null; this.emit({ t: 'unqueued' }); },
+
+  /* ---------- a ranked match against a real person, phone to phone ---------- */
+  /* what an opponent says about themselves is shown on screen, so it is checked like a name typed here */
+  _cleanOpp(o){
+    let name = String((o && o.name) || '').replace(/[<>&"'`\u0000-\u001f]/g, '').trim().slice(0, 14);
+    if (name.length < 2 || (typeof Moderation !== 'undefined' && Moderation.check(name, 'name'))) name = 'Player';
+    const avatar = Rules.AVATARS.includes(o && o.avatar) ? o.avatar : '🦁';
+    const rating = Math.max(100, Math.min(3000, Math.round(+(o && o.rating) || 1000)));
+    return { name, avatar, rating };
+  },
+  _psend(x){ const s = this._session; return !!(s && s.send && s.send(x)); },
+  _sessionFor(m){
+    return P2P.session({ id: m.id, oppPeerId: m.oppPeerId, conn: m._conn || null, extra: m._extra || [],
+      onMsg: x => this._peerMsg(x), onDown: () => this._peerDown(), onUp: () => this._peerUp() });
+  },
+  _startPeer(res, stake, game){
+    const a = LocalBackend._me();
+    if (!a || (a.active && a.active.status === 'active')){ try{ res.conn.close(); }catch(e){} return; }
+    const opp = this._cleanOpp(res.opp);
+    const m = { id: String(res.id).slice(0, 40), game, status: 'active', my: res.my, stake, pot: stake * 2, opp: { ...opp, computer: false },
+      peer: true, myPeerId: P2P.myId(), oppPeerId: String(res.oppPeerId || '').slice(0, 80),
+      moves: [], clock: { w: Rules.CLOCK_MS, b: Rules.CLOCK_MS }, turnStartedAt: Date.now() };
+    this._stakeIt(a, m);
+    a.active = m; LocalBackend._save(a); this._qStake = null;
+    this._session = P2P.session({ id: m.id, oppPeerId: m.oppPeerId, conn: res.conn, extra: res.extra,
+      onMsg: x => this._peerMsg(x), onDown: () => this._peerDown(), onUp: () => this._peerUp() });
+    this.offline = false; this.oppGone = null;
+    this.emit({ t: 'matched', match: this._view(a, m) });
+    this._tick();
+  },
+  /* back after a reload: the same peer address if it can be had, then dial the opponent; the reconnection time runs meanwhile */
+  _resumePeer(a, m){
+    if (this._resuming === m.id) return;
+    this._resuming = m.id;
+    this._peerDown(true);
+    P2P.me(m.myPeerId).then(() => {
+      const a2 = LocalBackend._me(), m2 = a2 && a2.active;
+      if (!m2 || m2.id !== m.id || m2.status !== 'active') return;
+      this._session = P2P.session({ id: m.id, oppPeerId: m.oppPeerId, conn: null,
+        onMsg: x => this._peerMsg(x), onDown: () => this._peerDown(), onUp: () => this._peerUp() });
+    }).catch(() => {}).finally(() => { this._resuming = null; });
+  },
+  _peerMsg(x){
+    const a = LocalBackend._me(), m = a && a.active;
+    if (!m || !m.peer || m.status !== 'active' || !x) return;
+    const Gm = GAMES[m.game || 'chess'], s = Gm.replay(m.moves), opp = m.my === 'w' ? 'b' : 'w';
+    switch (x.t){
+      case 'move': {
+        if (x.ply !== m.moves.length || Gm.turnOf(s) !== opp){ this._psend({ t: 'state', moves: m.moves, clock: m.clock }); return; }
+        const mv = Gm.fromUci(s, String(x.uci || '')); if (!mv) return;
+        const before = m.clock[opp];
+        this._charge(m);
+        if (Number.isFinite(+x.left)) m.clock[opp] = Math.max(0, Math.min(before, +x.left));
+        m.moves.push(Gm.toUci(mv)); m.drawOffer = null;
+        this._ended(a, m, Gm.apply(s, mv)); return this._push(a, m);
+      }
+      case 'resign': this._charge(m); this._settle(a, m, 'won', 'resignation'); return this._push(a, m);
+      case 'abort': if (m.moves.length < 2){ this._settle(a, m, 'aborted', 'canceled before the first move'); this._push(a, m); } return;
+      case 'draw_offer': m.drawOffer = 'opp'; return this._push(a, m);
+      case 'draw_accept': if (m.drawOffer === 'me'){ this._settle(a, m, 'drawn', 'agreement'); this._push(a, m); } return;
+      case 'flag': this._charge(m); this._settle(a, m, 'won', 'time'); return this._push(a, m);
+      case 'timeout': {
+        const mineLeft = m.clock[m.my] - (Gm.turnOf(s) === m.my ? Date.now() - m.turnStartedAt : 0);
+        if (mineLeft <= 2500){ this._charge(m); this._settle(a, m, 'lost', 'time'); this._push(a, m); }
+        return;
+      }
+      case 'gone': {                                         // the opponent's own phone says it did not get back in time
+        const early = m.moves.length < 2;
+        this._settle(a, m, early ? 'aborted' : 'won', early ? 'a player did not move in time' : 'a lost connection that was not restored in time');
+        return this._push(a, m);
+      }
+      case 'state': {
+        const theirs = Array.isArray(x.moves) ? x.moves.slice(0, 600).map(String) : [];
+        if (theirs.length > m.moves.length && m.moves.every((u, k) => u === theirs[k]) && Gm.replay(theirs)){
+          m.moves = theirs; m.turnStartedAt = Date.now(); m.drawOffer = null;
+          if (x.clock) ['w', 'b'].forEach(c => { if (Number.isFinite(+x.clock[c])) m.clock[c] = Math.max(0, Math.min(m.clock[c], +x.clock[c])); });
+          this._ended(a, m, Gm.replay(m.moves));
+        }
+        return this._push(a, m);
+      }
+    }
+  },
+  /* the connection between the two phones dropped. If this phone is offline it is ours; otherwise the opponent's. */
+  _peerDown(ours){
+    const a = LocalBackend._me(), m = a && a.active;
+    if (!m || !m.peer || m.status !== 'active') return;
+    const mine = ours || navigator.onLine === false || P2P.signallingDown();
+    const grace = NET().GRACE_S * 1000, until = Date.now() + grace;
+    clearTimeout(this._graceT);
+    if (mine){ this.offline = true; this.emit({ t: 'connection', online: false, since: Date.now(), attempt: 0 }); }
+    else { this.oppGone = { until }; this.emit({ t: 'presence', matchId: m.id, online: false, graceUntil: until, serverNow: Date.now() }); }
+    this._graceT = setTimeout(() => {
+      const a2 = LocalBackend._me(), m2 = a2 && a2.active;
+      if (!m2 || m2.id !== m.id || m2.status !== 'active') return;
+      if (this._session && this._session.lk && this._session.lk.alive) return;
+      const early = m2.moves.length < 2;
+      this._charge(m2);
+      this._settle(a2, m2, early ? 'aborted' : mine ? 'lost' : 'won', early ? 'a player did not move in time' : 'a lost connection that was not restored in time');
+      this.offline = false; this.oppGone = null;
+      this._push(a2, m2);
+    }, grace);
+  },
+  _peerUp(){
+    const a = LocalBackend._me(), m = a && a.active;
+    clearTimeout(this._graceT);
+    const wasOff = this.offline, wasGone = !!this.oppGone;
+    this.offline = false; this.oppGone = null;
+    if (!m || !m.peer || m.status !== 'active') return;
+    if (wasOff) this.emit({ t: 'connection', online: true });
+    if (wasGone) this.emit({ t: 'presence', matchId: m.id, online: true, back: true, serverNow: Date.now() });
+    this._psend({ t: 'state', moves: m.moves, clock: m.clock });
+    this._push(a, m);
+  },
   _act(id, fn){
     if (this.offline) return this.emit({ t: 'error', error: 'You are offline. Your move will be sent when the connection is back.' });
     const a = LocalBackend._me(), m = a && a.active;
@@ -4899,50 +5196,110 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
     const G = GAMES[m.game || 'chess'], s = G.replay(m.moves);
     if (G.turnOf(s) !== m.my) throw err('It is not your turn.');
     const mv = G.fromUci(s, uci); if (!mv) throw err('That move is not legal.');
-    this._charge(m); m.moves.push(G.toUci(mv));
-    if (!this._ended(a, m, G.apply(s, mv))) this._reply();
+    this._charge(m); m.moves.push(G.toUci(mv)); m.drawOffer = null;
+    if (m.peer) this._psend({ t: 'move', ply: m.moves.length - 1, uci: G.toUci(mv), left: m.clock[m.my] });
+    if (!this._ended(a, m, G.apply(s, mv)) && !m.peer) this._reply();
   }); },
-  resign(id){ this._act(id, (a, m) => { this._charge(m); this._settle(a, m, 'lost', 'resignation'); }); },
+  resign(id){ this._act(id, (a, m) => { if (m.peer) this._psend({ t: 'resign' }); this._charge(m); this._settle(a, m, 'lost', 'resignation'); }); },
   abort(id){ this._act(id, (a, m) => {
     if (m.moves.some((_, i) => (i % 2 ? 'b' : 'w') === m.my)) throw err('You have already moved. Leaving now means resigning.');
+    if (m.peer) this._psend({ t: 'abort' });
     this._settle(a, m, 'aborted', 'canceled before the first move');
   }); },
-  draw(){ this.emit({ t: 'error', error: 'The practice opponent declined the draw.' }); },
+  draw(id){
+    const a = LocalBackend._me(), m = a && a.active;
+    if (!m || !m.peer) return this.emit({ t: 'error', error: 'The practice opponent declined the draw.' });
+    this._act(id, (a, m) => {
+      if (m.drawOffer === 'opp'){ this._psend({ t: 'draw_accept' }); this._settle(a, m, 'drawn', 'agreement'); }
+      else { m.drawOffer = 'me'; this._psend({ t: 'draw_offer' }); }
+    });
+  },
   away(){}, signal(){}, reconnect(){},
 
-  /* ---------- Play Friends, simulated for the demo ----------
-     The demo has no server, so a friend cannot really join from another phone. A pretend friend ("Hanna", clearly
-     marked as the computer) joins when the demo says so (Demo tools, or the button under the QR code), and any code typed
-     in "Join a friend" opens a game with her. Same messages and rules as the server (server/src/game/friends.js). */
-  fr: { invite: null, game: null },
+  /* ---------- Play Friends ----------
+     Online through PeerJS: the host's code is the meeting point, and the game is played phone to phone. Junior accounts
+     play only junior accounts and adult accounts only adult accounts (both phones check). Where PeerJS cannot load
+     (no internet), the demo falls back to a pretend friend ("Hanna", marked as the computer). */
+  fr: { invite: null, game: null, session: null, hosting: null, pending: null },
   FRIEND: { name: 'Hanna', avatar: '🦒', computer: true },
+  FRIEND_GRACE_MS: 10 * 60 * 1000,
   _fCheck(){
-    const a = LocalBackend._need(), j = LocalBackend._junior(a);
-    if (!j.junior) throw err('Play Friends is only for junior accounts.', 403);
+    const a = LocalBackend._need();
     LocalBackend._ready(a); LocalBackend._access(a, 'play');
     return a;
   },
+  _fKind(){ const a = LocalBackend._me(); return { junior: !!(a && LocalBackend._junior(a).junior), name: a ? a.name : 'Player', avatar: a ? a.avatar : '🦁' }; },
   _fTry(fn){ try{ fn(); }catch(e){ this.emit({ t: 'error', error: e.message }); } },
   _fView(){ const g = this.fr.game; return g && { ...g, moves: g.moves.slice(), opp: { ...g.opp } }; },
   _fPush(type){ this.emit({ t: type || 'friend', match: this._fView() }); },
+  _kindError(){ return t('Junior accounts can only play with junior accounts, and adult accounts with adult accounts.'); },
   friendInvite(game, color){ this._fTry(() => {
     this._fCheck();
-    const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', code = Array.from({ length: 6 }, () => A[Math.floor(Math.random() * A.length)]).join('');
+    if (this.fr.hosting){ this.fr.hosting.stop(); this.fr.hosting = null; }
+    const A = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', code = Array.from(crypto.getRandomValues(new Uint8Array(6)), b => A[b % A.length]).join('');
     // a demo hosted on a website gets a real link to itself; opened from a file there is no address, so the code alone
     const url = /^https?:/.test(location.protocol) ? location.origin + location.pathname + '?friend=' + code : code;
-    this.fr.invite = { code, game: game || 'chess', color: color || 'random', expiresAt: Date.now() + 30 * 6e4, url };
-    this.emit({ t: 'friend_invite', invite: this.fr.invite });
+    const inv = this.fr.invite = { code, game: game || 'chess', color: color || 'random', expiresAt: Date.now() + 30 * 6e4, url, online: null };
+    this.emit({ t: 'friend_invite', invite: inv });
+    P2P.load().then(ok => !ok ? null : P2P.hostFriend(code, {
+      onPeek: () => { const k = this._fKind(); return { game: inv.game, host: { name: k.name, avatar: k.avatar }, junior: k.junior }; },
+      onJoin: m => {
+        const k = this._fKind();
+        if (this.fr.invite !== inv || Date.now() > inv.expiresAt) return { refuse: 'expired' };
+        if (!!m.junior !== k.junior) return { refuse: 'kind' };
+        if (this.fr.game && this.fr.game.status === 'active') return { refuse: 'busy' };
+        const mine = inv.color === 'random' ? (Math.random() < .5 ? 'w' : 'b') : inv.color;
+        return { start: { id: 'pf-' + code + '-' + Date.now().toString(36), game: inv.game, color: mine === 'w' ? 'b' : 'w', name: k.name, avatar: k.avatar }, mine };
+      },
+      onStart: (conn, r, m, lobby) => {
+        this.fr.invite = null; this.fr.hosting = null;
+        this._fStartPeer({ conn, id: r.start.id, game: r.start.game, my: r.mine, opp: m, oppPeerId: m.peer, extra: [lobby] });
+      }
+    })).then(h => {
+      if (this.fr.invite === inv){ inv.online = !!h; this.fr.hosting = h; this.emit({ t: 'friend_invite', invite: inv }); }
+      else if (h) h.stop();
+    }).catch(() => { if (this.fr.invite === inv){ inv.online = false; this.emit({ t: 'friend_invite', invite: inv }); } });
   }); },
-  friendCancel(){ this.fr.invite = null; this.emit({ t: 'friend_invite', invite: null }); },
+  friendCancel(){ if (this.fr.hosting){ this.fr.hosting.stop(); this.fr.hosting = null; } this.fr.invite = null; this.emit({ t: 'friend_invite', invite: null }); },
   friendPeek(code){ this._fTry(() => {
     this._fCheck();
-    if (!/^[A-HJ-NP-Z2-9]{6}$/.test(String(code || '').toUpperCase())) throw err('That code did not work. Check it with your friend, or ask for a new one.', 404);
-    this.emit({ t: 'friend_peek', invite: { code: String(code).toUpperCase(), game: gameId0(), host: { name: this.FRIEND.name, avatar: this.FRIEND.avatar } } });
+    const c = String(code || '').toUpperCase();
+    if (!/^[A-HJ-NP-Z2-9]{6}$/.test(c)) throw err('That code did not work. Check it with your friend, or ask for a new one.', 404);
+    if (this.fr.invite && this.fr.invite.code === c) throw err('That is your own code. Send it to your friend.');
+    P2P.load().then(async ok => {
+      if (!ok) return this._fPeekDemo(c);
+      const k = this._fKind();
+      try{
+        const r = await P2P.peekFriend(c, { junior: k.junior });
+        if (!!r.invite.junior !== k.junior){ try{ r.conn.close(); }catch(e){} return this.emit({ t: 'error', about: 'friend_peek', error: this._kindError() }); }
+        if (this.fr.pending) try{ this.fr.pending.conn.close(); }catch(e){}
+        this.fr.pending = { code: c, conn: r.conn };
+        const host = this._cleanOpp(r.invite.host || {});
+        this.emit({ t: 'friend_peek', invite: { code: c, game: Rules.GAMES_PLAYABLE.includes(r.invite.game) ? r.invite.game : 'chess', host: { name: host.name, avatar: host.avatar } } });
+      }catch(e){
+        if (e && e.type === 'unavailable') return this._fPeekDemo(c);
+        this.emit({ t: 'error', about: 'friend_peek', error: t('Nobody is waiting with that code. Check it with your friend, or ask them for a new one.') });
+      }
+    });
   }); },
-  friendJoin(){ this._fTry(() => { this._fCheck(); this._fStart(gameId0(), Math.random() < .5 ? 'w' : 'b'); }); },
+  /* no internet for online play: the demo's pretend friend answers any code */
+  _fPeekDemo(c){ this.emit({ t: 'friend_peek', invite: { code: c, game: gameId0(), host: { name: this.FRIEND.name, avatar: this.FRIEND.avatar }, demo: true } }); },
+  friendJoin(code){ this._fTry(() => {
+    this._fCheck();
+    const pend = this.fr.pending;
+    if (!pend || pend.code !== String(code || '').toUpperCase()) return this._fStart(gameId0(), Math.random() < .5 ? 'w' : 'b');
+    this.fr.pending = null;
+    const k = this._fKind();
+    P2P.joinFriend(pend.conn, { name: k.name, avatar: k.avatar, junior: k.junior }).then(st => {
+      this._fStartPeer({ conn: pend.conn, id: String(st.id).slice(0, 60), game: Rules.GAMES_PLAYABLE.includes(st.game) ? st.game : 'chess',
+        my: st.color === 'b' ? 'b' : 'w', opp: st, oppPeerId: String(st.peer || ''), extra: [] });
+    }).catch(e => this.emit({ t: 'error', about: 'friend_join', error: e && e.type === 'kind' ? this._kindError()
+      : e && e.type === 'busy' ? t('Your friend is already in a game.') : t('That code did not work. Check it with your friend, or ask for a new one.') }));
+  }); },
   /* demo: the pretend friend scans the QR code */
   simulateFriendJoin(){
     const inv = this.fr.invite; if (!inv) return false;
+    if (this.fr.hosting){ this.fr.hosting.stop(); this.fr.hosting = null; }
     this.fr.invite = null;
     this._fStart(inv.game, inv.color === 'random' ? (Math.random() < .5 ? 'w' : 'b') : inv.color);
     return true;
@@ -4953,20 +5310,35 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
     this._fPush('friend_start');
     if (my === 'b') this._fReply();
   },
+  _fStartPeer(o){
+    if (this.fr.session){ this.fr.session.end({ t: 'bye' }); this.fr.session = null; }
+    const opp = this._cleanOpp(o.opp);
+    this.fr.game = { id: o.id, game: o.game, status: 'active', my: o.my, moves: [], turn: 'w', opp: { name: opp.name, avatar: opp.avatar, computer: false },
+      oppOnline: true, endReason: null, drawOffer: null, rematch: null, xp: 0, peer: true };
+    this.fr.session = P2P.session({ id: o.id, oppPeerId: o.oppPeerId, conn: o.conn, extra: o.extra,
+      onMsg: x => this._fPeerMsg(x), onDown: () => this._fPeerDown(), onUp: () => this._fPeerUp() });
+    this._fPush('friend_start');
+  },
+  _fSend(x){ const s = this.fr.session; return !!(s && s.send(x)); },
   _fEnd(status, reason){
     const g = this.fr.game; Object.assign(g, { status, endReason: reason, drawOffer: null });
-    if (g.moves.length >= 10){
-      const a = LocalBackend._need(), xp = Rules.botXP(2, status === 'won' ? 'W' : status === 'drawn' ? 'D' : 'L');
-      Rules.addXP(a, xp); LocalBackend._save(a); g.xp = xp;
-      this.emit({ t: 'friend', match: this._fView(), player: LocalBackend._pub(a) }); return;
-    }
-    this._fPush();
+    clearTimeout(this._fGraceT);
+    if (g.counted) return this._fPush();                          // a result is counted once, however it arrives
+    g.counted = true;
+    const a = LocalBackend._me(); if (!a) return this._fPush();
+    const res = status === 'won' ? 'W' : status === 'drawn' ? 'D' : 'L';
+    // friendly games: +5 XP for a win, nothing for a loss or a draw, -5 for resigning or a connection that did not come back
+    const xp = status === 'abandoned' ? 0 : Rules.gameXP(res, reason);
+    Rules.addXP(a, xp); g.xp = xp;
+    if (status !== 'abandoned'){ const st = LocalBackend._stats(a, g.game); st.fg = (st.fg || 0) + 1; if (res === 'W') st.fw = (st.fw || 0) + 1; }
+    LocalBackend._save(a);
+    this.emit({ t: 'friend', match: this._fView(), player: LocalBackend._pub(a) });
   },
   _fState(){ const g = this.fr.game, Game = GAMES[g.game], s = Game.replay(g.moves); g.turn = Game.turnOf(s); return { Game, s }; },
   _fReply(){
     const g0 = this.fr.game;
     setTimeout(() => {
-      const g = this.fr.game; if (g !== g0 || g.status !== 'active') return;
+      const g = this.fr.game; if (g !== g0 || g.status !== 'active' || g.peer) return;
       const { Game, s } = this._fState(); if (Game.turnOf(s) === g.my) return;
       const mv = Game.botMove(s, 2); if (!mv) return;
       g.moves.push(Game.toUci(mv)); if (g.drawOffer === 'me') g.drawOffer = null;
@@ -4975,6 +5347,66 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
       this._fPush();
     }, 900 + Math.random() * 1600);
   },
+  _fPeerMsg(x){
+    const g = this.fr.game; if (!g || !g.peer || !x) return;
+    if (x.t === 'bye'){ g.oppOnline = false; g.oppLeft = true; this._fPush(); return; }
+    if (x.t === 'rematch'){
+      if (g.status === 'active') return;
+      if (g.rematch === 'me') return this._fRematchGo();
+      g.rematch = 'opp'; return this._fPush();
+    }
+    if (g.status !== 'active') return;
+    const { Game, s } = this._fState(), opp = g.my === 'w' ? 'b' : 'w';
+    switch (x.t){
+      case 'move': {
+        if (x.ply !== g.moves.length || Game.turnOf(s) !== opp){ this._fSend({ t: 'state', moves: g.moves }); return; }
+        const mv = Game.fromUci(s, String(x.uci || '')); if (!mv) return;
+        g.moves.push(Game.toUci(mv)); if (g.drawOffer === 'me') g.drawOffer = null;
+        const st = Game.status(Game.apply(s, mv)); this._fState();
+        if (st.over) return this._fEnd(st.winner ? (st.winner === g.my ? 'won' : 'lost') : 'drawn', st.type);
+        return this._fPush();
+      }
+      case 'resign': return this._fEnd('won', 'resign');
+      case 'draw_offer': g.drawOffer = 'opp'; return this._fPush();
+      case 'draw_accept': if (g.drawOffer === 'me') this._fEnd('drawn', 'agreed'); return;
+      case 'gone': return this._fEnd('won', 'disconnect');
+      case 'state': {
+        const theirs = Array.isArray(x.moves) ? x.moves.slice(0, 600).map(String) : [];
+        if (theirs.length > g.moves.length && g.moves.every((u, k) => u === theirs[k]) && Game.replay(theirs)){
+          g.moves = theirs; const st = Game.status(Game.replay(theirs)); this._fState();
+          if (st.over) return this._fEnd(st.winner ? (st.winner === g.my ? 'won' : 'lost') : 'drawn', st.type);
+        }
+        return this._fPush();
+      }
+    }
+  },
+  _fRematchGo(){
+    const g = this.fr.game; if (!g) return;
+    this.fr.game = { id: g.id.slice(0, 50) + 'r', game: g.game, status: 'active', my: g.my === 'w' ? 'b' : 'w', moves: [], turn: 'w', opp: { ...g.opp },
+      oppOnline: true, endReason: null, drawOffer: null, rematch: null, xp: 0, peer: true };
+    this._fPush('friend_start');
+  },
+  _fPeerDown(){
+    const g = this.fr.game; if (!g || !g.peer || g.status !== 'active') return;
+    const mine = navigator.onLine === false || P2P.signallingDown();
+    if (mine){ this._fOffline = true; this.emit({ t: 'connection', online: false, since: Date.now() }); }
+    else { g.oppOnline = false; this.emit({ t: 'friend_presence', gameId: g.id, online: false }); }
+    clearTimeout(this._fGraceT);
+    this._fGraceT = setTimeout(() => {
+      const g2 = this.fr.game; if (g2 !== g || g.status !== 'active') return;
+      if (this.fr.session && this.fr.session.lk && this.fr.session.lk.alive) return;
+      this._fOffline = false;
+      this._fEnd(mine ? 'lost' : 'won', 'disconnect');
+    }, this.FRIEND_GRACE_MS);
+  },
+  _fPeerUp(){
+    clearTimeout(this._fGraceT);
+    const g = this.fr.game; if (!g || !g.peer) return;
+    if (this._fOffline){ this._fOffline = false; this.emit({ t: 'connection', online: true }); }
+    if (g.status === 'active' && g.oppOnline === false){ g.oppOnline = true; this.emit({ t: 'friend_presence', gameId: g.id, online: true }); }
+    this._fSend({ t: 'state', moves: g.moves });
+    this._fPush();
+  },
   friendMove(id, uci){ this._fTry(() => {
     const g = this.fr.game; if (!g || g.id !== id) throw err('This game has ended.', 404);
     if (g.status !== 'active') throw err('This game is already over.', 409);
@@ -4982,13 +5414,18 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
     if (Game.turnOf(s) !== g.my) throw err('It is not your turn.', 409);
     const mv = Game.fromUci(s, uci); if (!mv) throw err('That move is not legal.');
     g.moves.push(Game.toUci(mv)); if (g.drawOffer === 'opp') g.drawOffer = null;
+    if (g.peer) this._fSend({ t: 'move', ply: g.moves.length - 1, uci: Game.toUci(mv) });
     const st = Game.status(Game.apply(s, mv)); this._fState();
     if (st.over) return this._fEnd(st.winner ? (st.winner === g.my ? 'won' : 'lost') : 'drawn', st.type);
-    this._fPush(); this._fReply();
+    this._fPush(); if (!g.peer) this._fReply();
   }); },
-  friendResign(id){ const g = this.fr.game; if (g && g.id === id && g.status === 'active') this._fEnd('lost', 'resign'); },
+  friendResign(id){ const g = this.fr.game; if (g && g.id === id && g.status === 'active'){ if (g.peer) this._fSend({ t: 'resign' }); this._fEnd('lost', 'resign'); } },
   friendDraw(id){
     const g = this.fr.game; if (!g || g.id !== id || g.status !== 'active') return;
+    if (g.peer){
+      if (g.drawOffer === 'opp'){ this._fSend({ t: 'draw_accept' }); return this._fEnd('drawn', 'agreed'); }
+      g.drawOffer = 'me'; this._fSend({ t: 'draw_offer' }); return this._fPush();
+    }
     g.drawOffer = 'me'; this._fPush();
     setTimeout(() => {                                         // the pretend friend says yes once the game is a little way in
       if (this.fr.game !== g || g.status !== 'active' || g.drawOffer !== 'me') return;
@@ -4998,16 +5435,33 @@ const LocalLive = Object.assign(Object.create(LiveBase), {
   },
   friendRematch(id){
     const g = this.fr.game; if (!g || g.id !== id || g.status === 'active') return;
+    if (g.peer){
+      if (g.oppLeft){ this.emit({ t: 'error', error: t('{name} has left.', { name: g.opp.name }) }); return; }
+      this._fSend({ t: 'rematch' });
+      if (g.rematch === 'opp') return this._fRematchGo();
+      g.rematch = 'me'; return this._fPush();
+    }
     g.rematch = 'me'; this._fPush();
     setTimeout(() => { if (this.fr.game === g) this._fStart(g.game, g.my === 'w' ? 'b' : 'w'); }, 1500);
   },
-  friendLeave(){ const g = this.fr.game; if (g && g.status !== 'active') this.fr.game = null; },
+  friendLeave(){
+    const g = this.fr.game; if (!g || g.status === 'active') return;
+    if (this.fr.session){ this.fr.session.end({ t: 'bye' }); this.fr.session = null; }
+    this.fr.game = null;
+  },
   friendSync(){ this._fPush(); },
   sync(){
     const a = LocalBackend._me(), m = a && a.active;
     if (m) this.emit({ t: 'match', match: this._view(a, m) });
   },
-  async active(){ const a = LocalBackend._me(), m = a && a.active; if (m && m.status === 'active'){ this._tick(); return this._view(a, m); } return null; }
+  async active(){
+    const a = LocalBackend._me(), m = a && a.active;
+    if (m && m.status === 'active'){
+      if (m.peer && !(this._session && this._session.id === m.id && !this._session.ended)) this._resumePeer(a, m);
+      this._tick(); return this._view(a, m);
+    }
+    return null;
+  }
 });
 
 /* ------------------------------------------------------------------ pick one */
@@ -5033,6 +5487,287 @@ async function initBackend(){
   Backend = LocalBackend; Live = LocalLive;
   return Backend;
 }
+
+</script>
+<script>/* public/js/p2p.js */
+/* Copyright (c) 2026 Abbel Dawit. All rights reserved. King Safari — proprietary and confidential; see LICENSE and NOTICE. */
+/* King Safari — online play without a King Safari server, through PeerJS (WebRTC data channels).
+   Used by the stand-alone build (LocalLive) so ranked tables and Play Friends reach real people on other phones.
+   The real app uses its own server (RemoteLive) and never loads this.
+
+   Privacy: PeerJS is loaded only when the player starts an online search or makes a friend code, never before.
+   The PeerJS signalling server (0.peerjs.com) only introduces the two phones; after that they talk directly, or
+   through a PeerJS relay when a network blocks direct connections. Only the display name, animal, rating, account
+   kind (junior or adult) and the moves are sent. Never the phone number, date of birth, balance or anything else.
+   A direct connection lets each phone see the other's IP address, as any online game does; the Privacy Policy says so.
+
+   Matchmaking: each table (game + stake) has a few well-known lobby names. A searching player first knocks on each
+   one; whoever answers there and is within the rating window starts a match with them. If a lobby name is free, the
+   player sits in it for a while and waits to be found, then looks around again. Once matched, the lobby name is
+   freed for the next players, and the game goes on over the same connection.
+   Reconnecting: both phones keep a personal peer id; if the connection drops, each keeps dialling the other. */
+"use strict";
+const P2P = (() => {
+  const PROTO = 1, PREFIX = 'kingsafari-v12-', SLOTS = 3;
+  const SOURCES = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js',
+                   'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',
+                   'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js'];
+  const OPTS = { debug: 0 };                       // PeerJS defaults: its public server, Google STUN and the PeerJS TURN relays
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+  const rid = n => Array.from(crypto.getRandomValues(new Uint8Array(n || 8)), b => (b % 36).toString(36)).join('');
+  let loading = null, main = null, mainOpening = null, sessions = new Map();
+
+  /* ---------- loading PeerJS, lazily ---------- */
+  function addScript(src){
+    return new Promise(res => {
+      const el = document.createElement('script'); let done = false;
+      const end = ok => { if (done) return; done = true; if (!ok) el.remove(); res(ok && typeof window.Peer === 'function'); };
+      el.src = src; el.async = true; el.crossOrigin = 'anonymous';
+      el.onload = () => end(true); el.onerror = () => end(false);
+      document.head.appendChild(el);
+      setTimeout(() => end(typeof window.Peer === 'function'), 9000);
+    });
+  }
+  function load(){
+    if (typeof window.Peer === 'function') return Promise.resolve(true);
+    if (!window.RTCPeerConnection) return Promise.resolve(false);
+    if (loading) return loading;
+    loading = (async () => { for (const src of SOURCES){ if (await addScript(src)) return true; } loading = null; return false; })();
+    return loading;
+  }
+
+  /* ---------- peers and connections ---------- */
+  function open(id){
+    return new Promise((resolve, reject) => {
+      let p;
+      try{ p = id ? new window.Peer(id, OPTS) : new window.Peer(OPTS); }catch(e){ return reject({ type: 'browser-incompatible' }); }
+      const timer = setTimeout(() => fail({ type: 'timeout' }), 10000);
+      const ok = () => { clean(); p.on('error', () => {}); resolve(p); };
+      const fail = e => { clean(); try{ p.destroy(); }catch(_){} reject({ type: (e && e.type) || 'error' }); };
+      const clean = () => { clearTimeout(timer); p.off('open', ok); p.off('error', fail); };
+      p.on('open', ok); p.on('error', fail);
+    });
+  }
+  /* this phone's own peer: the address the opponent dials to reconnect. reuse: try to get the same id back (after a reload). */
+  async function me(reuse){
+    if (main && !main.destroyed) return main;
+    if (mainOpening) return mainOpening;
+    mainOpening = (async () => {
+      if (!(await load())) throw { type: 'unavailable' };
+      for (let k = 0; reuse && k < 4; k++){
+        try{ main = await open(reuse); break; }catch(e){ if (e.type !== 'unavailable-id') break; await pause(2000); }
+      }
+      if (!main || main.destroyed) main = await open();
+      main.on('connection', incoming);
+      main.on('disconnected', () => { setTimeout(() => { try{ if (main && !main.destroyed && main.disconnected) main.reconnect(); }catch(_){} }, 1500); });
+      return main;
+    })();
+    try{ return await mainOpening; } finally { mainOpening = null; }
+  }
+  const myId = () => main && !main.destroyed ? main.id : null;
+  const signallingDown = () => !main || main.destroyed || main.disconnected;
+  function dial(peer, id, ms){
+    return new Promise((resolve, reject) => {
+      let conn;
+      try{ conn = peer.connect(id, { reliable: true, serialization: 'json' }); }catch(e){ return reject({ type: 'error' }); }
+      if (!conn) return reject({ type: 'error' });
+      const timer = setTimeout(() => done(false, { type: 'timeout' }), ms || 6000);
+      const onPeerErr = e => { if (e && e.type === 'peer-unavailable' && String(e.message || '').includes(id)) done(false, { type: 'peer-unavailable' }); };
+      const onConnErr = e => done(false, { type: (e && e.type) || 'error' });
+      const done = (ok, v) => {
+        clearTimeout(timer); peer.off('error', onPeerErr); conn.off('error', onConnErr);
+        if (ok) resolve(conn); else { try{ conn.close(); }catch(_){} reject(v); }
+      };
+      peer.on('error', onPeerErr); conn.on('error', onConnErr);
+      conn.on('open', () => done(true));
+    });
+  }
+  /* the next message on a connection (for handshakes) */
+  function next(conn, ms){
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { conn.off('data', on); reject({ type: 'timeout' }); }, ms || 5000);
+      const on = d => { const m = parse(d); if (!m || m.t === 'ping') return; clearTimeout(timer); conn.off('data', on); resolve(m); };
+      conn.on('data', on);
+    });
+  }
+  const parse = d => { if (typeof d === 'string'){ try{ return JSON.parse(d); }catch(e){ return null; } } return d && typeof d === 'object' ? d : null; };
+  const send = (conn, m) => { try{ conn.send(m); return true; }catch(e){ return false; } };
+
+  /* a live link: heartbeat every 2.5 s, dead after 9 s of silence */
+  function link(conn, onMsg, onClose){
+    let last = Date.now(), dead = false;
+    const beat = setInterval(() => { if (Date.now() - last > 9000) return kill(); send(conn, { t: 'ping' }); }, 2500);
+    const onData = d => { last = Date.now(); const m = parse(d); if (m && m.t !== 'ping') onMsg(m); };
+    conn.on('data', onData); conn.on('close', () => kill()); conn.on('error', () => kill());
+    function kill(quiet){
+      if (dead) return; dead = true; clearInterval(beat); conn.off('data', onData);
+      try{ conn.close(); }catch(_){}
+      if (!quiet && onClose) onClose();
+    }
+    return { send: m => !dead && send(conn, m), close: () => kill(true), get alive(){ return !dead; } };
+  }
+
+  /* someone dialled this phone's own peer: a player coming back to a game */
+  function incoming(conn){
+    next(conn, 8000).then(m => {
+      const s = m && m.t === 'rejoin' && sessions.get(m.id);
+      if (!s || s.ended) return conn.close();
+      send(conn, { t: 'rejoined', id: m.id });
+      s.attach(conn);
+    }).catch(() => { try{ conn.close(); }catch(_){} });
+  }
+
+  /* ---------- one game between two phones ----------
+     onMsg(m): a message from the opponent · onDown(): the connection dropped · onUp(): it is back */
+  function session(o){
+    const s = {
+      id: o.id, opp: o.oppPeerId, ended: false, lk: null, extra: o.extra || [], retryT: null,
+      attach(conn){
+        if (s.ended){ try{ conn.close(); }catch(_){} return; }
+        const was = s.lk; if (was) was.close();
+        const back = !!s.downAt; s.downAt = null;
+        s.lk = link(conn, m => { if (!s.ended && m.t !== 'rejoined') o.onMsg(m); }, () => s.down());
+        clearTimeout(s.retryT);
+        if (back || o.resume){ o.resume = false; o.onUp && o.onUp(); }
+      },
+      send(m){ return !!(s.lk && s.lk.send(m)); },
+      down(){
+        if (s.ended) return;
+        s.lk = null; s.downAt = s.downAt || Date.now();
+        o.onDown && o.onDown();
+        s.retry();
+      },
+      async retry(){
+        clearTimeout(s.retryT);
+        if (s.ended || (s.lk && s.lk.alive)) return;
+        try{
+          const p = await me();
+          if (p.disconnected && !p.destroyed) try{ p.reconnect(); }catch(_){}
+          const conn = await dial(p, s.opp, 5000);
+          if (s.ended || (s.lk && s.lk.alive)){ conn.close(); return; }
+          send(conn, { t: 'rejoin', id: s.id });
+          const m = await next(conn, 5000);
+          if (m && m.t === 'rejoined') s.attach(conn); else conn.close();
+        }catch(e){}
+        if (!s.ended && !(s.lk && s.lk.alive)) s.retryT = setTimeout(() => s.retry(), 3000);
+      },
+      end(farewell){
+        if (s.ended) return;
+        if (farewell) s.send(farewell);
+        s.ended = true; clearTimeout(s.retryT);
+        setTimeout(() => { if (s.lk) s.lk.close(); s.extra.forEach(p => { try{ p.destroy(); }catch(_){} }); }, 1500);
+        sessions.delete(s.id);
+      }
+    };
+    sessions.set(s.id, s);
+    if (o.conn) s.attach(o.conn); else { s.downAt = Date.now(); o.resume = true; s.retry(); }
+    return s;
+  }
+
+  /* ---------- ranked matchmaking ----------
+     me: { name, avatar, rating }. Resolves { conn, id, my, opp:{name,avatar,rating}, oppPeerId, extra } or null if cancelled. */
+  const slotId = (game, stake, k) => `${PREFIX}r-${game}-${stake}-${k}`;
+  function findMatch(o){
+    let cancelled = false, lobby = null;
+    const handle = { cancel(){ cancelled = true; if (lobby){ try{ lobby.destroy(); }catch(_){} lobby = null; } } };
+    const hello = () => ({ t: 'hello', v: PROTO, kind: 'ranked', game: o.game, stake: o.stake, name: o.me.name, avatar: o.me.avatar, rating: o.me.rating, peer: myId() });
+    const close = (a, b) => Math.abs((+a || 0) - (+b || 0)) <= o.maxGap;
+    handle.done = (async () => {
+      const p = await me();
+      while (!cancelled){
+        let free = null;
+        for (let k = 0; k < SLOTS && !cancelled; k++){
+          let conn = null;
+          try{
+            conn = await dial(p, slotId(o.game, o.stake, k), 4500);
+            send(conn, hello());
+            const m = await next(conn, 5000);
+            if (m.t === 'accept' && m.v === PROTO && m.id && !cancelled)
+              return { conn, id: m.id, my: m.color === 'b' ? 'b' : 'w', opp: { name: m.name, avatar: m.avatar, rating: m.rating }, oppPeerId: m.peer, extra: [] };
+            conn.close();
+          }catch(e){
+            if (conn) try{ conn.close(); }catch(_){}
+            if (e && e.type === 'peer-unavailable' && free == null) free = k;
+          }
+        }
+        if (cancelled) break;
+        if (o.onLook) o.onLook();
+        if (free == null){ await pause(1500 + Math.random() * 1500); continue; }
+        try{ lobby = await open(slotId(o.game, o.stake, free)); }catch(e){ lobby = null; await pause(400 + Math.random() * 800); continue; }
+        // wait here to be found, then look around again
+        const got = await new Promise(resolve => {
+          let taken = false;
+          const timer = setTimeout(() => resolve(null), 9000 + Math.random() * 6000);
+          const stopCheck = setInterval(() => { if (cancelled){ clearTimeout(timer); clearInterval(stopCheck); resolve(null); } }, 300);
+          lobby.on('connection', conn => {
+            next(conn, 6000).then(m => {
+              const ok = !taken && !cancelled && m.t === 'hello' && m.v === PROTO && m.kind === 'ranked' && m.game === o.game && m.stake === o.stake
+                && m.peer && close(m.rating, o.me.rating);
+              if (!ok){ send(conn, { t: 'reject', why: taken ? 'busy' : 'mismatch' }); setTimeout(() => conn.close(), 300); return; }
+              taken = true; clearTimeout(timer); clearInterval(stopCheck);
+              const id = 'p2p-' + rid(10), mine = Math.random() < .5 ? 'w' : 'b';
+              send(conn, { t: 'accept', v: PROTO, id, color: mine === 'w' ? 'b' : 'w', name: o.me.name, avatar: o.me.avatar, rating: o.me.rating, peer: myId() });
+              resolve({ conn, id, my: mine, opp: { name: m.name, avatar: m.avatar, rating: m.rating }, oppPeerId: m.peer });
+            }).catch(() => { try{ conn.close(); }catch(_){} });
+          });
+        });
+        if (got && !cancelled){
+          const lb = lobby; lobby = null;
+          try{ lb.disconnect(); }catch(_){}                 // free the lobby name; the game connection stays up
+          got.extra = [lb];
+          return got;
+        }
+        if (lobby){ try{ lobby.destroy(); }catch(_){} lobby = null; }
+      }
+      return null;
+    })();
+    return handle;
+  }
+
+  /* ---------- Play Friends: the code is the meeting point ---------- */
+  const friendId = code => `${PREFIX}f-${String(code).toUpperCase()}`;
+  /* host a code. onPeek(m) -> invite info to send back; onJoin(m) -> { start } to send, or { refuse } */
+  async function hostFriend(code, h){
+    await me();
+    const lobby = await open(friendId(code));
+    let used = false;
+    lobby.on('connection', conn => {
+      const onData = d => {
+        const m = parse(d); if (!m || m.t === 'ping') return;
+        if (m.v !== PROTO){ send(conn, { t: 'refuse', why: 'version' }); return; }
+        if (m.t === 'peek'){ send(conn, Object.assign({ t: 'invite' }, h.onPeek(m))); return; }
+        if (m.t === 'join'){
+          if (used){ send(conn, { t: 'refuse', why: 'used' }); return; }
+          const r = h.onJoin(m);
+          if (r.refuse){ send(conn, { t: 'refuse', why: r.refuse }); return; }
+          used = true; conn.off('data', onData);
+          send(conn, Object.assign({ t: 'start', v: PROTO, peer: myId() }, r.start));
+          try{ lobby.disconnect(); }catch(_){}               // a code works once
+          h.onStart(conn, r, m, lobby);
+        }
+      };
+      conn.on('data', onData);
+    });
+    return { stop(){ if (!used) try{ lobby.destroy(); }catch(_){} } };
+  }
+  /* knock on a friend's code: resolves { conn, invite } — the connection stays open for join() */
+  async function peekFriend(code, mine){
+    const p = await me();
+    const conn = await dial(p, friendId(code), 7000);
+    send(conn, Object.assign({ t: 'peek', v: PROTO }, mine));
+    const m = await next(conn, 6000);
+    if (m.t !== 'invite'){ conn.close(); throw { type: m.why || 'refused' }; }
+    return { conn, invite: m };
+  }
+  async function joinFriend(conn, mine){
+    send(conn, Object.assign({ t: 'join', v: PROTO, peer: myId() }, mine));
+    const m = await next(conn, 8000);
+    if (m.t !== 'start'){ conn.close(); throw { type: m.why || 'refused' }; }
+    return m;
+  }
+
+  return { load, me, myId, signallingDown, session, findMatch, hostFriend, peekFriend, joinFriend, available: () => typeof window.Peer === 'function' };
+})();
 
 </script>
 <script>/* public/js/superapp.js */
@@ -5300,6 +6035,63 @@ const CHECKERS_LESSONS = [
                     wrong:'Use the king\u2019s backward jump.' }],
            done:'Correct. Only a king can capture in that direction.' } }
 ];
+
+/* Three in a row: every lesson asks for three correct moves back to back before it counts as understood. A one-move
+   task is played three times, a two-move task twice; the long endgame task once. Rounds after the first use these
+   other positions (same idea, different board), so the third right answer is not just the first one remembered.
+   An alternative may replace the step's moves and hint; anything it leaves out comes from the lesson's own step. */
+const LESSON_ALTS = {
+  chess: {
+    1: [ { fen:'k7/8/8/8/5p2/4P3/8/7K w - - 0 1', steps:[{ moves:['e3f4'], hint:'Capture the black pawn on f4 with your pawn.' }] },
+         { fen:'k7/8/2p5/1P6/8/8/8/7K w - - 0 1', steps:[{ moves:['b5c6'], hint:'Capture the black pawn on c6 with your pawn.' }] } ],
+    2: [ { fen:'k7/6p1/8/8/8/8/1R5p/K7 w - - 0 1' },
+         { fen:'k7/5p2/8/8/2p2R2/8/8/7K w - - 0 1' } ],
+    3: [ { fen:'k7/8/8/1p3p2/8/8/8/5B1K w - - 0 1', steps:[{ moves:['f1b5'], hint:'Only one black pawn is on a diagonal from f1. Capture it.' }] },
+         { fen:'k7/8/3p3p/8/8/8/3B4/7K w - - 0 1', steps:[{ moves:['d2h6'], hint:'Only one black pawn is on a diagonal from d2. Capture it.' }] } ],
+    4: [ { fen:'k7/8/8/8/8/5pp1/8/6NK w - - 0 1', steps:[{ moves:['g1f3'] }] },
+         { fen:'k7/8/2p1p3/4N3/8/8/8/7K w - - 0 1', steps:[{ moves:['e5c6'] }] } ],
+    5: [ { fen:'k7/1p6/8/8/4Q2p/8/8/7K w - - 0 1', steps:[{ hint:'Capture one of the black pawns with the queen.' }] },
+         { fen:'k7/2p5/6p1/8/8/8/2Q5/7K w - - 0 1', steps:[{ hint:'Capture one of the black pawns with the queen.' }] } ],
+    6: [ { fen:'4k3/8/8/8/8/8/PPP5/R3K3 w Q - 0 1', steps:[{ moves:['e1c1'], hint:'Castle on the queen side: tap the king on e1, then tap c1.',
+           wrong:'That is a normal king move. To castle, move the king two squares, from e1 to c1.' }] },
+         { fen:'4k3/8/8/8/8/8/PPP2PPP/R3K2R w KQ - 0 1', steps:[{ moves:['e1g1','e1c1'], hint:'Castle on either side: move the king two squares toward a rook.',
+           wrong:'That is a normal king move. To castle, move the king two squares toward a rook.' }] } ],
+    7: [ { fen:'k7/ppp5/8/8/8/8/8/6RK w - - 0 1' },
+         { fen:'6k1/5ppp/8/8/8/8/8/3Q2K1 w - - 0 1', steps:[{ hint:'Bring the queen to the back row.' }] } ],
+    8: [ { fen:'k7/8/8/3b4/8/2N5/8/6K1 w - - 0 1', steps:[{ moves:['c3d5'], hint:'The black bishop on d5 is attacked by your knight and nothing defends it. Capture it.',
+           wrong:'That leaves the free bishop on the board. Take it.' }] },
+         { fen:'k7/8/5n2/8/8/8/1B6/7K w - - 0 1', steps:[{ moves:['b2f6'], hint:'The black knight on f6 is attacked by your bishop and nothing defends it. Capture it.' }] } ],
+    9: [ { fen:'1r3k2/8/8/2N5/8/8/8/4K3 w - - 0 1', steps:[
+           { moves:['c5d7'], hint:'Jump to the square that attacks both f8 and b8.' },
+           { moves:['d7b8'], hint:'The king has stepped out of check. Now capture the rook on b8.', wrong:'The rook is still there for the taking. Capture it on b8.' }] } ],
+    10: [ { fen:'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1' },
+          { fen:'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1' } ]
+  },
+  checkers: {
+    1: [ { pos:{ wM:['e3'], bM:['f4'] }, steps:[{ moves:['e3g5'], hint:'Jump over the black man on f4 and land on g5.' }] },
+         { pos:{ wM:['f2'], bM:['e3'] }, steps:[{ moves:['f2d4'], hint:'Jump over the black man on e3 and land on d4.' }] } ],
+    2: [ { pos:{ wM:['a3','e3'], bM:['f4','c7'] } },
+         { pos:{ wM:['b2','h2'], bM:['c3','e7'] } } ],
+    3: [ { pos:{ wM:['g3'], bM:['f4','d6'] }, steps:[{ moves:['g3e5c7'], hint:'Jump to e5, then carry on over the man on d6 to c7.' }] },
+         { pos:{ wM:['a1'], bM:['b2','d4'] }, steps:[{ moves:['a1c3e5'], hint:'Jump to c3, then carry on over the man on d4 to e5.' }] } ],
+    4: [ { pos:{ wM:['g7'], bM:['b4'] }, steps:[{ hint:'Move your man to the last row.' }] },
+         { pos:{ wM:['a7'], bM:['h4'] }, steps:[{ hint:'Move your man to the last row.' }] } ],
+    5: [ { pos:{ wK:['e5'], bM:['d4','d6'] }, steps:[{ moves:['e5c3'], hint:'Jump backwards over the man on d4.' }] },
+         { pos:{ wK:['f4'], bM:['g3','e5'] }, steps:[{ moves:['f4h2'], hint:'Jump backwards over the man on g3.' }] } ]
+  }
+};
+const LESSON_STREAK = 3;                 // correct moves in a row
+/* the rounds of a lesson: [{ start, steps }] — round r is played on rounds[r] */
+function lessonRounds(game, i){
+  const L = LESSONS[game][i], base = L.task.steps;
+  const n = base.some(x => x.goal === 'promote') ? 1 : Math.ceil(LESSON_STREAK / base.length);
+  const alts = (LESSON_ALTS[game] || {})[i] || [];
+  return Array.from({ length: n }, (_, r) => {
+    const a = r === 0 ? null : alts[(r - 1) % (alts.length || 1)];
+    if (!a) return { fen: L.fen, pos: L.pos, steps: base };
+    return { fen: a.fen, pos: a.pos, steps: base.map((st, k) => Object.assign({}, st, (a.steps || [])[k] || {})) };
+  });
+}
 
 const LESSONS = { chess: CHESS_LESSONS, checkers: CHECKERS_LESSONS };
 
@@ -5723,27 +6515,112 @@ function changeLang(id){
 const langSwitch = () => `<div class="lang-switch" role="group" aria-label="Language">${LANGS.map(l =>
   `<button data-lang="${l.id}" aria-pressed="${l.id === LANG}">${l.name}</button>`).join('')}</div>`;
 
-/* sound: tiny synth, no assets */
-let AC = null;
+/* sound: tiny synth, no assets.
+   Every button, tab, switch, link and choice in the app taps (one listener for the whole page, so a new button can never
+   be silent), and scrolling any list ticks softly, the same voice as the tap but quieter. A screen that already plays
+   its own tap does not double it: two taps within a moment are one. */
+let AC = null, lastTapAt = 0;
+/* the scrolling sound (a short run of wheel ticks), decoded once the audio is unlocked by the first tap */
+const SCROLL_SOUND = 'data:audio/mpeg;base64,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Sx02LpxIzQQM2USw5BgDNRTKRNJpRLxOTZts8Xy+pig7LZIyMzRH/NEFuU2TX///mxKDwc0UibkM9////prsec0UiblM5/////3GLw+hzv///d7ZBWbFqf3vgIA8tviTLoRYKkzBJCeByBwk1a0LJMIYHUcAWotHEDpAm6ZcBOAnxeG8Ssegkw9CwcJaZjABuE8vDkZAeg5USsuophxlg5zMuF8eijE8XTUxLqBdSLg8E59FM0STRWaqMS6aGLGpLkuo0KD+16losiylj0LiJuMs0JdH///dA0obn2////09jzoKRNzc5/////3GLzdy02AwDJIDBbej1mw2GwmnR06X1kAZy1x90v2PLI3ruXd+jsRReJQv6VaAqg6CEeEqXkd3LYBSbgjzn+tVcP0agEAEZVRoRtilUPNJfX8sf4boCEZiKHKAWEtIOjXYzJK39/v+m+3JAchYW3Upa9alNLNU/0v6/+/8HO62dTRfDCV/snw1//vUZEIABstmWO5nAABqx4o6xTwAFWTdP/msAAp0G+d3M4ABVmpqXQDKf////9hkffmXXpbI3cgiCb1Nr9dxuZWv//////k8KgRy3jaJCVwKDsoWMzVddXHV2rehqVW6XGtQ/////////nhvHtjC7lasU92tY/+q3YeAAAAAAQmHBaLQHzJMqZQONQYDwO4i+j164skZuOBOQQHlmpGqsO3kqrZafW7PHOR5HNBhVjnA///YHCSJTanhqXSmd///95R5E8TTFpqivnGN////vV7zP49Y1oT2A983w/og3cdO///NqqREPEIqAIsit37f+RkAAewj3+3ZBosxMEwg40BkwoALszALTREAUgM2yCpkEHQKoA0Ao1iJdKcHUTjpCB0RUqzEKlPMmBAR8yAVEkIC2darvkTUAjGWEUyunYir/tclqEpMp73MZqwQOInugkQmqbIytGbkxlp08m5AbZHVdB5V+sAbMoo19fUhdVrTWn5Y878OQE9cqfWURimxs4y6pP52e65b7UDbsEBW25LbZJQSSnJJLakiAAN2PmvgC+SiIzBzJUFR2L8Ba8hOC5SrgMUKjR+HoNjVsWaQGFBOiSuREQ4ozC4QgSIii7PIejTuqHrlkM2JCbxBJE0S1To0NLYC/SEpGt5GYohNJa8xFXkpWZVhl4KZ2XSgeB3ZfC6yCNLanXYfiPQ9QRV3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PIIwlUotYjM8bXn0d1+pK6sON3lktirZ4Ha9KqN9n/tS2EZy59JRUvw5OVYbuxaakes3+pNY4XastgeL08CSiKyzVFMXN04dYg4dB8PG7NdFn5ef/EEMf5+RUAYA/fdTVRryhr5r4DmovJ7QpQAuVFyRL/S0uY1tQh2y6Rp5RgAIMCCJMKCmcgYAYQOo804VCDgBADYgVKJgkgUlDq92TPo365lytObpptYNguZfieiESvzUq+hsxN3ZdF4et8uZ9ty5/t2olykvYUuNJRffu//P5r/3nn+Wdqinzn7bfyjjH1g/B+Q8o4MRc/1w/EAYKOXMi2OkFSMRABEouJRvS8OhQccEJ+mNzRFVUIGGeSFQKdVCwFSkyQRmggCAqA018FPFuzYUuE6TdoukmtA0SMWgk5pc6UndRgklBzUBKCtym267X5HSUYyZtS/ypy/1ytnz2sSBlkdi8bTTL4rAlxUPnd3rXdap/l8xYlnGlNstJeyttC13vOfzn52K9unv4dlDosFUWcVHpYdQL////e4xelmPbFe3L77c2Cuy7tI+rqsylrAv///////uGFJzt6nty+5Yl77SJ4Y03F3FbX4Yk6TLmw/////////rD8N9z7/dcw53////////////LeONm5jW7WtVe0tTcuFSkRUJRE0GJKKQWy8TBFcYHKymHrNJBglphbBP0141W1I0xgB7REABzAvisE1ZBOcCphkSqAk+zfBBBhiGABIMbM1Rr0KT4CAGqnMaYCZoC916a6D7nw5Ch0J1UTl3pfayt3eP5OPxVl9OpWhqyFACnc7vP7/6i/X7iEUhy84TzMiZMwGhd3////7c5Nz8P0di1UiLus+h1gTW2tf///73SclnO4V7dPfdNpr6vzUiL8tylrKv//////5nUwpLHb0rtw/csRd9os6M//vUROMAB8521v5rAAD77trvzWQAGy0JK5m9gAuSo6b/NbABaaS4icriLGbkupnv/////////z8N933+65h/////////////5bxxxuY5drWqvauGjtrrAIAAAII10wLSUHdpl7ayXaNuNzLCcySUGAoaNRQBNPFTEWA2AsU8YCJKLkiKgITpDAdFM/JTBRkZQAmhjBng0YiJgIsMMCkZBYeMNCiUDBgIhOQnt7UlYEAmgF6lSoTQoBJ+JjoqORJG3fuLMMVQXey5drMm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///8vnPBAPRAREBQAc0AhAMDRgENAYbGBg+tswQAf////9+2//vUZPqABGcsQG1jQAClpnfKrWwALmIdPbm+AALmQCFjH0ABmMjZOkW2d+IGcBPUt6KgxMEAgwCgMwCBv//////YZIGCUtuKPvA7O5GqujiwFiMoaSwVLZ+Uev////////pIHcCBF2PJL2rKBtuXzeppjB0ql7IgsSEADL4GAAagoYFAAjAAGBw4Bf/////////////////////3AYhOJ0PW09h7L8lY1oMkQceVx////////////0hlUUNUJoOAI6BkVRUAJZBUCCQGCgLfMwACQoAAAAAFKMAAPC/hMJMAAhPilooI0JkAmCjKMOkWofAr4YDEvBR+GWALZgN6LBCOAIGAY4CFoANnQM+DBYyDAQEQAXQC/4DA4mwNaHA6ZECxAWeZkSPDoFBDtLZDS6BjxIBV8L2ADCwAn5VPHFIV0ykfUDeANXgNExBQmwvur0PVxSAsBiOoR4NAvf/+OAaBbJwWAny4OD///L7oLNz7JldD////m6kGSNCo5oaOh//////////+aHsv29eYAAAAAAAAWkALBJiR/VjPt3NSfzXKmXBAiiqFBA9pxFa54QUTioIEBBg2LRgqPCh5YENDBOk8n6YxbPYiSczsE8FBcYUACYfg0YcAwYGgmIwcMGQgEYFiQPGBoEEoBhQAkQkJ5KEBgSEAKBcIB1boEABoBepUqNoUABWRMdIRnCMqZDMFrp6LyWww9ly7WZNKYOyyBW+bx+VvNBa7AzmLppovAjkwFE90UPUsMx6ZhmtQ0Moi1NNM9fWmuUctdmPROvX7O0cultHLmgQqXcrVq8FRKRyajpt8q4W6arZ7lvX95jlS1dSmlsvtWl0zvKU613e+dyx1rvP3rf8z7zvefKZ3LvIalU9KauMpmZ19v+2UAAAAAABUWVACBkxgabDl+m+aCZ5nKPsNMJiAsAUMGx0JomR3cYGCoJFQ8GTCoeMDsG4wNQ0AqBGYAASalcHGlarkYpIfxh5gcGKEFCYAAFhgFgrGBmC6YMIKSSwCAGGQ//vURLkACIhmSs5voAFADMkpzngAHOVLGRmtgAOgJ+PnM6AAIBEAIYAYHBgEgSioDZgDABgQApyBQCIwHwBAEC2DALQ4DEcAXMAABQQACIYFk05isAJYqj7IAMBQpghW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';
+let scrollBuf = null, scrollLoading = false;
+function loadScrollSound(ctx){
+  if (scrollBuf || scrollLoading) return;
+  scrollLoading = true;
+  try{
+    const bin = atob(SCROLL_SOUND.split(',')[1]), bytes = new Uint8Array(bin.length);
+    for (let k = 0; k < bin.length; k++) bytes[k] = bin.charCodeAt(k);
+    ctx.decodeAudioData(bytes.buffer, b => { scrollBuf = b; }, () => { scrollLoading = false; });
+  }catch(e){ scrollLoading = false; }
+}
+function audio(){
+  AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume().catch(() => {});
+  loadScrollSound(AC);
+  return AC;
+}
 function beep(type){
   if (!prefs.sound) return;
   try{
-    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const now = performance.now();
+    if (type === 'tap'){ if (now - lastTapAt < 140) return; lastTapAt = now; }
+    if (type === 'scroll' && (!AC || AC.state !== 'running')) return;      // never the first sound: browsers wait for a tap
+    const ctx = audio();
     const seq = { move:[[520,.06]], cap:[[190,.1]], check:[[740,.08],[590,.12]],
                   win:[[523,.1],[659,.1],[784,.16]], lose:[[330,.14],[247,.2]],
-                  coin:[[880,.06],[1175,.1]], tap:[[420,.03]] }[type] || [[440,.05]];
-    let tt = AC.currentTime;
+                  coin:[[880,.06],[1175,.1]], tap:[[420,.03]], scroll:[[460,.018]] }[type] || [[440,.05]];
+    const peak = type === 'scroll' ? .055 : .16;
+    let tt = ctx.currentTime;
     for (const [f, d] of seq){
-      const o = AC.createOscillator(), g = AC.createGain();
+      const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = type === 'cap' ? 'triangle' : 'sine'; o.frequency.value = f;
       g.gain.setValueAtTime(.0001, tt);
-      g.gain.exponentialRampToValueAtTime(.16, tt + .012);
+      g.gain.exponentialRampToValueAtTime(peak, tt + .008);
       g.gain.exponentialRampToValueAtTime(.0001, tt + d);
-      o.connect(g).connect(AC.destination); o.start(tt); o.stop(tt + d + .02);
+      o.connect(g).connect(ctx.destination); o.start(tt); o.stop(tt + d + .02);
       tt += d * .85;
     }
   }catch(e){}
 }
+/* The scrolling sound follows the scrolling: it starts with the first movement, keeps going (the busy part of the clip,
+   looped at its own natural pace) only while the list is actually moving, and fades out within a
+   few hundredths of a second of the list coming to rest, so it never sounds like it is still going. */
+const scrollVoice = (() => {
+  let src = null, gain = null, stopT = null;
+  // the whole clip, at its own speed: its ticks keep their natural spacing, never sped up
+  function start(speed){
+    if (!prefs.sound || !scrollBuf || !AC || AC.state !== 'running') return false;
+    if (!src){
+      src = AC.createBufferSource(); gain = AC.createGain();
+      src.buffer = scrollBuf; src.loop = true; src.loopStart = 0; src.loopEnd = scrollBuf.duration; src.playbackRate.value = 1;
+      gain.gain.setValueAtTime(.0001, AC.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.7, AC.currentTime + .015);
+      src.connect(gain).connect(AC.destination); src.start();
+    }
+    clearTimeout(stopT); stopT = setTimeout(stop, 90);  // no movement for 90 ms: the scroll has stopped
+    return true;
+  }
+  function stop(){
+    clearTimeout(stopT); stopT = null;
+    if (!src) return;
+    const s = src, g = gain, now = AC.currentTime; src = gain = null;
+    try{ g.gain.cancelScheduledValues(now); g.gain.setValueAtTime(g.gain.value, now); g.gain.linearRampToValueAtTime(0, now + .04); s.stop(now + .05); }catch(e){ try{ s.stop(); }catch(_){} }
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
+  return { start, stop, get playing(){ return !!src; } };
+})();
+(function soundEverywhere(){
+  const TAPPABLE = 'button, [role="button"], [role="tab"], [role="switch"], a[href], summary, select, label.agree, label.reason, label.photo-pick, input[type="checkbox"], input[type="radio"], .swatch';
+  // click (not pointerdown) so keyboard presses tap too, and a disabled button stays silent
+  document.addEventListener('click', e => {
+    const el = e.target && e.target.closest && e.target.closest(TAPPABLE);
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+    if (el.tagName === 'LABEL' && e.target !== el && /INPUT/.test(e.target.tagName)) return;   // the label's own click already tapped
+    beep('tap');
+  }, true);
+  document.addEventListener('change', e => { if (e.target && e.target.tagName === 'SELECT') beep('tap'); }, true);
+  // scrolling: only scrolls the player makes (finger, wheel, keys), never the app scrolling a move list by itself
+  let inputAt = 0, lastTick = 0, travel = 0;
+  const pos = new WeakMap();
+  const touched = () => { inputAt = performance.now(); };
+  ['wheel', 'touchmove'].forEach(ev => document.addEventListener(ev, touched, { capture: true, passive: true }));
+  document.addEventListener('pointermove', e => { if (e.buttons) touched(); }, { capture: true, passive: true });
+  document.addEventListener('keydown', e => { if (/^(Arrow(Up|Down|Left|Right)|Page(Up|Down)|Home|End| )$/.test(e.key)) touched(); }, true);
+  document.addEventListener('scroll', e => {
+    const el = e.target === document ? (document.scrollingElement || document.documentElement) : e.target;
+    if (!el || el.nodeType !== 1) return;
+    const y = el.scrollTop + el.scrollLeft, prev = pos.get(el); pos.set(el, y);
+    if (prev == null) return;
+    const now = performance.now(), moved = Math.abs(y - prev);
+    if (!moved) return;
+    // started by the player (finger, wheel, keys); once going it follows momentum to the end. An automatic scroll is silent.
+    if (!scrollVoice.playing && now - inputAt > 1400) return;
+    const speed = moved / Math.max(8, now - (lastTick || now - 16));   // px per ms
+    lastTick = now;
+    if (scrollVoice.start(speed)) return;
+    travel += moved;                                    // the audio is not ready yet: the short synth tick instead
+    if (travel >= 64){ travel = 0; beep('scroll'); }
+  }, { capture: true, passive: true });
+})();
 
 function confetti(){
   const c = document.getElementById('fx'), x = c.getContext('2d');
@@ -5869,6 +6746,7 @@ const ICONS = {
   idcard: SV('<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="8.6" cy="11" r="2"/><path d="M5.8 16c.6-1.4 1.6-2 2.8-2s2.2.6 2.8 2M14 10h4M14 13.5h3"/>'),
   globe: SV('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.7 5.6 3.7 9s-1.2 6.4-3.7 9c-2.5-2.6-3.7-5.6-3.7-9S9.5 5.6 12 3z"/>'),
   wifi: SV('<path d="M2.5 8.8a14 14 0 0 1 19 0"/><path d="M5.6 12.2a9.5 9.5 0 0 1 12.8 0"/><path d="M8.8 15.5a5 5 0 0 1 6.4 0"/><circle cx="12" cy="19" r="1.2"/>'),
+  clock: SV('<circle cx="12" cy="13" r="7.6"/><path d="M12 9v4.2l2.6 1.6M9.6 2.8h4.8M12 2.8v2.6"/>', 2.2),
   wifiOff: SV('<path d="M2.5 8.8a14 14 0 0 1 4.6-2.9M11 4.8a14 14 0 0 1 10.5 4M5.6 12.2a9.5 9.5 0 0 1 3.6-2M14.6 10.1a9.5 9.5 0 0 1 3.8 2.1M8.8 15.5a5 5 0 0 1 6.4 0"/><circle cx="12" cy="19" r="1.2"/><path d="M3 3l18 18"/>')
 };
 const kingMark = cls => `<span class="logo-mark${cls ? ' ' + cls : ''}" aria-hidden="true">${CROWN_SVG}</span>`;
@@ -5965,7 +6843,6 @@ function go(name, data){
   if (GATED.has(name) && P && P.name && needsDetails()){ data = { next: name, nextData: data }; name = 'complete'; }
   else if (P && P.name && awaitingGuardian() && GUARDIAN_GATED.has(name)){ data = { next: name }; name = 'guardian'; }
   else if (P && P.name && isJunior() && JUNIOR_BLOCKED.has(name)){ data = { from: name }; name = 'juniorLocked'; }
-  else if (P && P.name && !isJunior() && name === 'friends'){ name = 'home'; data = {}; setTimeout(() => toast(t('Play Friends is only for junior accounts.')), 300); }   // never for money accounts
   else if (P && P.name && subscriptionBlocks(name)){ data = { next: name }; name = 'subscribe'; }
   view = { screen: name, data: data || {} };
   SCREENS[name]();
@@ -6426,8 +7303,10 @@ const juniorCard = () => `<div class="card junior-card"><span class="kyc-ic">${I
 
 SCREENS.home = () => {
   const g = gameId0(), st = ST(g), jr = isJunior();
-  if (pendingFriendCode() && jr && !awaitingGuardian()) return go('friends', { join: takeFriendCode() });   // opened from a friend's QR code
-  const tr = Rules.tierOf(st.rating), need = Rules.xpNeeded(P.level), pct = Math.round(P.xp / need * 100);
+  if (pendingFriendCode() && !awaitingGuardian()) return go('friends', { join: takeFriendCode() });   // opened from a friend's QR code
+  const tr = Rules.tierOf(st.rating), need = Rules.xpNeeded(P.level), maxed = P.level >= Rules.MAX_LEVEL;
+  const pct = maxed ? 100 : Math.min(100, Math.round(P.xp / need * 100));
+  const ps = practiceStats(st);
   screen(`
   <header class="topbar home-top">
     <button class="me-chip" data-go="you" aria-label="${t('Your profile')}">
@@ -6457,6 +7336,9 @@ SCREENS.home = () => {
           <span class="ic">${artFor(g, g === 'chess' ? 'bN' : 'bM')}</span>
           <span class="tx"><b>${t('Play bots')}</b><span>${t('Four opponents, free and unranked')}</span></span><span class="chev">${ICONS.chev}</span></button>`
         : `<button class="btn go xl" data-go="ranked">${ICONS.trophy}${g === 'chess' ? t('Play ranked chess') : t('Play ranked checkers')}</button>
+        <button class="mode" data-go="friends">
+          <span class="ic" style="color:var(--green-ink)">${ICONS.friends}</span>
+          <span class="tx"><b>${t('Play Friends')}</b><span>${t('Friendly games: no tokens, no rating')}</span></span><span class="chev">${ICONS.chev}</span></button>
         <button class="mode" data-go="bots">
           <span class="ic">${artFor(g, g === 'chess' ? 'bN' : 'bM')}</span>
           <span class="tx"><b>${t('Play bots')}</b><span>${t('Four opponents, free and unranked')}</span></span><span class="chev">${ICONS.chev}</span></button>`}
@@ -6470,11 +7352,11 @@ SCREENS.home = () => {
     </div>
     <div>
       ${jr ? `<div class="sec-h">${g === 'chess' ? t('Your chess progress') : t('Your checkers progress')} <small>${t('Junior account')}</small></div>
-      <div class="stats4">
-        <div><b>${st.lessons.length}/${LESSONS[g].length}</b><span>${t('Lessons')}</span></div>
-        <div><b>${st.botW}</b><span>${t('Bots beaten')}</span></div>
-        <div><b>${P.level}</b><span>${t('Level')}</span></div>
-        <div><b>${fmt(P.xp)}</b><span>${t('XP')}</span></div>
+      <div class="stats4 progress4">
+        <div><b>${Math.min(st.lessons.length, LESSONS[g].length)}/${LESSONS[g].length}</b><span>${t('Lessons')}</span></div>
+        <div><b>${st.botW || 0}</b><span>${t('Bots beaten')}</span></div>
+        <div><b>${ps.friendly}</b><span>${t('Friendly games')}</span></div>
+        <div><b>${ps.rate || 0}%</b><span>${t('Win rate')}</span></div>
       </div>` : `<div class="sec-h">${g === 'chess' ? t('Your chess record') : t('Your checkers record')} <small>${t('Ranked tables')}</small></div>
       <div class="stats4">
         <div><b>${st.rating}</b><span>${t('Rating')}</span></div>
@@ -6485,7 +7367,7 @@ SCREENS.home = () => {
       <div class="card" style="margin-top:12px; padding:14px 16px">
         <div class="lvl"><div class="badge">${P.level}</div>
           <div style="flex:1; min-width:0">
-            <div class="between" style="margin-bottom:7px"><b style="font-size:14.5px">${t('Level {n}', { n: P.level })}</b><span class="tiny">${t('{xp} XP to level {n}', { xp: need - P.xp, n: P.level + 1 })}</span></div>
+            <div class="between" style="margin-bottom:7px"><b style="font-size:14.5px">${t('Level {n}', { n: P.level })}</b><span class="tiny">${maxed ? t('Top level reached') : t('{xp} XP to level {n}', { xp: need - P.xp, n: P.level + 1 })}</span></div>
             <div class="bar"><i style="width:${pct}%"></i></div></div></div>
       </div>
       ${jr ? `<div style="margin-top:12px">${juniorCard()}</div>` : `<button class="mode" data-go="leaderboard" style="margin-top:12px">
@@ -6499,8 +7381,8 @@ SCREENS.home = () => {
   $$('[data-game]').forEach(b => b.onclick = () => { setGameId(b.dataset.game); beep('tap'); go('home'); });
   $('#localbtn').onclick = () => startGame({ mode: 'local', game: g });
   $('#themeb').onclick = toggleTheme;
-  if (jr){                                                      // junior accounts: a friend game to go back to, never a ranked match
-    const fg = typeof friendState !== 'undefined' && friendState.active;
+  const fg = typeof friendState !== 'undefined' && friendState.active;
+  if (jr || (fg && fg.status === 'active')){                   // a friend game to go back to (junior accounts never have a ranked one)
     if (fg && fg.status === 'active'){
       $('#resume').innerHTML = `<button class="mode resume" id="resumeb" style="margin-bottom:12px">
         <span class="ic" style="font-size:26px">${esc(fg.opp.avatar)}</span>
@@ -6508,7 +7390,7 @@ SCREENS.home = () => {
         <span class="chev">${ICONS.chev}</span></button>`;
       $('#resumeb').onclick = () => startGame({ mode: 'friend', match: fg });
     }
-    return;
+    if (jr) return;
   }
   Live.active().then(m => {
     const slot = $('#resume'); if (!m || !slot) return;
@@ -6519,6 +7401,12 @@ SCREENS.home = () => {
     $('#resumeb').onclick = () => startGame({ mode: 'ranked', match: m });
   }).catch(() => {});
 };
+/* a junior's practice record in one game: friendly games played, and the share of bot and friendly games won */
+function practiceStats(st){
+  const friendly = st.fg || 0, botGames = Math.max(st.botG || 0, st.botW || 0);
+  const played = botGames + friendly, won = (st.botW || 0) + (st.fw || 0);
+  return { friendly, played, won, rate: played ? Math.round(won / played * 100) : null };
+}
 /* "On a break until …" in words */
 function breakText(){
   if (!P || !P.excludedUntil) return '';
@@ -6637,7 +7525,7 @@ const reality = (() => {
    Ranked games are against another person. Moves go to the server over Live (a WebSocket);
    the server checks them, relays them to the opponent, runs both clocks and settles the stakes.
    The board shows your move straight away and corrects itself if the server disagrees.
-   Friend games (junior accounts only, mode 'friend') travel the same way, without clocks, stakes, ratings or reports. */
+   Friend games (mode 'friend': junior with junior, adult with adult) travel the same way, without clocks, stakes, ratings or reports. */
 "use strict";
 
 let G = null, clockT = null;
@@ -6695,7 +7583,7 @@ function pbar(who, side){
       <div class="line2">${who.computer ? `<span class="chip mini">${t('computer · demo')}</span>` : ''}
       ${side === 'opp' && (G.mode === 'ranked' || G.mode === 'friend') ? `<span class="chip off mini" id="opp-off" hidden>${t('offline')}</span>` : ''}
       <div class="taken" id="${tkId}"></div></div></div>
-    ${G.mode === 'ranked' ? `<div class="clock" id="${clId}">10:00</div>` : ''}
+    ${G.mode === 'ranked' ? `<div class="clock" id="${clId}"><span class="clk-ic" aria-hidden="true">${ICONS.clock}</span><span class="clk-t">10:00</span></div>` : ''}
   </div>`;
 }
 
@@ -6707,7 +7595,7 @@ SCREENS.game = () => {
     : t('Pass and play') + ' · ' + gname(GM().id);
   screen(`
   <header class="topbar game-top">
-    <button class="icon-btn" id="quit" aria-label="${t('Leave game')}">${ICONS.back}</button>
+    <button class="icon-btn" id="quit" aria-label="${m === 'ranked' ? t('Resign') : t('Leave game')}">${ICONS.back}</button>
     <div class="title">${esc(title)}<div class="sub" id="statusline">${t('White to move')}</div></div>
     ${m === 'ranked' ? `<span class="tok-pill" title="${t('Prize pool')}">${coinSVG()}${G.match.pot}</span>` : ''}
   </header>
@@ -6726,13 +7614,13 @@ SCREENS.game = () => {
         <span class="fp-more">${t('A player whose connection drops has {n} seconds to reconnect, or forfeits.', { n: Rules.CONNECTION.GRACE_S })}</span></span></button></div>` : ''}
       <div class="actions">
         ${m === 'friend' ? `<button class="act danger" id="resign">${ICONS.flag}<span>${t('Resign')}</span></button>
-                            <button class="act" id="drawb"><span class="half" aria-hidden="true">½</span><span>${t('Offer draw')}</span></button>`
+                            <button class="act" id="drawb" aria-label="${t('Offer draw')}"><span class="half" aria-hidden="true">½</span><span>${t('Draw')}</span></button>`
         : m !== 'ranked' ? `<button class="act" id="undo">${ICONS.undo}<span>${t('Undo')}</span></button>`
                          : `<button class="act danger" id="resign">${ICONS.flag}<span>${t('Resign')}</span></button>
-                            <button class="act" id="drawb"><span class="half" aria-hidden="true">½</span><span>${t('Offer draw')}</span></button>
+                            <button class="act" id="drawb" aria-label="${t('Offer draw')}"><span class="half" aria-hidden="true">½</span><span>${t('Draw')}</span></button>
                             <button class="act" id="reportb">${ICONS.report}<span>${t('Report')}</span></button>`}
-        <button class="act" id="flipb">${ICONS.flip}<span>${t('Flip board')}</span></button>
-        <button class="act" id="quit2">${ICONS.exit}<span>${t('Leave')}</span></button>
+        <button class="act" id="flipb" aria-label="${t('Flip board')}">${ICONS.flip}<span>${t('Flip')}</span></button>
+        ${m === 'ranked' ? '' : `<button class="act" id="quit2">${ICONS.exit}<span>${t('Leave')}</span></button>`}
       </div>
     </aside>
   </div>`);
@@ -6754,8 +7642,9 @@ SCREENS.game = () => {
       const cs = getComputedStyle(game), r = game.getBoundingClientRect();
       const avail = r.height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - bars - labels - sideH - 2;
       const sidePanel = side && wide ? side.getBoundingClientRect().width + 60 : 0;
-      const width = wide ? (innerWidth >= 1040 ? r.width - 470 : r.width - Math.max(sidePanel, 240) - 40) : innerWidth - 44;
-      const next = Math.round(Math.max(wide && innerWidth >= 1040 ? 300 : innerHeight < 480 ? 140 : 200, Math.min(width, 760, avail)));
+      // the board takes every pixel it can: only the coordinate margins (left and bottom) and a hair of edge are left over
+      const width = wide ? (innerWidth >= 1040 ? r.width - 420 : r.width - Math.max(sidePanel, 240) - 30) : innerWidth - 22;
+      const next = Math.round(Math.max(wide && innerWidth >= 1040 ? 300 : innerHeight < 480 ? 150 : 220, Math.min(width, 920, avail)));
       if (next === size) break;
       size = next;
       game.style.setProperty('--bd', size + 'px');
@@ -6767,7 +7656,7 @@ SCREENS.game = () => {
   G.board.setPosition(G.s);
   G.board.onSquare(onSquare);
   $('#flipb').onclick = () => { G.flip = !G.flip; G.board.setFlip(G.flip); orderBars(); refresh(); };
-  $('#quit').onclick = leaveGame; $('#quit2').onclick = leaveGame;
+  $('#quit').onclick = leaveGame; if ($('#quit2')) $('#quit2').onclick = leaveGame;
   if ($('#undo')) $('#undo').onclick = undo;
   if ($('#resign')) $('#resign').onclick = confirmResign;
   if ($('#drawb')) $('#drawb').onclick = offerDraw;
@@ -7043,8 +7932,8 @@ async function endFriend(r){
     return;
   }
   const won = r.status === 'won', draw = r.status === 'drawn';
-  const body = r.xp ? `<div class="gain"><div><b class="up" data-to="${r.xp}" data-plus="1">+${r.xp}</b><span>XP</span></div>
-      <div><b data-to="${P.level}">${P.level}</b><span>${t('Level')}</span></div></div>` : '';
+  const body = `<div class="gain" style="grid-template-columns:1fr 1fr">${xpTile(r.xp || 0)}
+      <div><b data-to="${P.level}">${P.level}</b><span>${t('Level')}</span></div></div>`;
   await celebrate(r.endReason, won, draw, won ? G.my : draw ? null : other(G.my));
   resultSheet({ title: won ? t('You won!') : draw ? t('Draw') : t('{name} won', { name: r.opp.name }), cls: won ? 'win' : draw ? 'draw' : 'lose',
     reason: t(GM().reason(r.endReason)), body: body + `<p class="tiny center" style="margin:10px 0 0">${t('Good game! Friend games are just for fun: no tokens and no rating.')}</p>`,
@@ -7116,8 +8005,10 @@ function drawClocks(){
   if (!G || !G.clock) return;
   const show = (ms, el) => {
     if (!el) return;
-    const v = Math.max(0, ms);
-    el.textContent = Math.floor(v/60000) + ':' + String(Math.floor(v/1000) % 60).padStart(2,'0');
+    const v = Math.max(0, ms), txt = Math.floor(v/60000) + ':' + String(Math.floor(v/1000) % 60).padStart(2,'0');
+    const tx = el.querySelector('.clk-t') || el;
+    if (tx.textContent !== txt) tx.textContent = txt;
+    el.setAttribute('aria-label', t('Clock: {t}', { t: txt }));
     el.classList.toggle('low', v < 30000);
   };
   show(G.clock[G.my], $('#cl-bot')); show(G.clock[other(G.my)], $('#cl-top'));
@@ -7242,15 +8133,9 @@ function leaveGame(){
       $('#yes').onclick = () => { closeSheet(); Live.abort(G.match.id); };
       return;
     }
-    sheet(`<h2>${t('Leave the table?')}</h2>
-      <p class="muted">${t('The game carries on without you and your clock keeps running. Come back from the home screen to continue, or resign now and {name} wins the {pot}-token pool.', { name: esc(tServer(G.match.opp.name)), pot: G.match.pot })}</p>
-      <div class="stack" style="margin-top:18px">
-        <button class="btn go" data-close>${t('Keep playing')}</button>
-        <button class="btn" id="later">${t('Leave for now')}</button>
-        <button class="btn flat danger" id="yes">${t('Resign and lose {n} tokens', { n: G.match.stake })}</button></div>`);
-    $('#later').onclick = () => { closeSheet(); G = null; go('home'); };
-    $('#yes').onclick = () => { closeSheet(); Live.resign(G.match.id); };
-    return;
+    // A ranked match cannot be paused or left for later: the only way out is to resign. (Only a dropped internet
+    // connection gets time to come back, and that is handled by the connection rules, not by this button.)
+    return confirmResign();
   }
   if (!G.moves.length){ G = null; go('home'); return; }
   const label = G.mode === 'bot' ? t(GM().bots[G.botLevel-1].name) : t('this game');
@@ -7264,22 +8149,25 @@ function leaveGame(){
 function confirmResign(){
   if (G.over) return;
   if (G.mode === 'friend'){
-    sheet(`<h2>${t('Resign this game?')}</h2><p class="muted">${t('{name} wins this game.', { name: esc(G.match.opp.name) })}</p>
+    sheet(`<h2>${t('Resign this game?')}</h2><p class="muted">${t('{name} wins this game.', { name: esc(G.match.opp.name) })} ${t('Resigning costs {n} XP.', { n: Math.abs(Rules.PENALTY_XP) })}</p>
       <div class="stack" style="margin-top:16px"><button class="btn danger-fill" id="yes">${t('Resign')}</button>
-      <button class="btn" data-close>${t('Keep playing')}</button></div>`);
+      <button class="btn go" data-close>${t('Keep playing')}</button></div>`);
     $('#yes').onclick = () => { closeSheet(); Live.friendResign(G.match.id); };
     return;
   }
   if (G.mode !== 'ranked') return;
   sheet(`<h2>${t('Resign this match?')}</h2>
     <p class="muted">${t('{name} takes the {pot}-token pool.', { name: esc(tServer(G.match.opp.name)), pot: G.match.pot })}</p>
+    <p class="tiny">${t('A ranked match cannot be paused or left for later. Resigning also costs {n} XP.', { n: Math.abs(Rules.PENALTY_XP) })}</p>
     <div class="stack" style="margin-top:16px">
       <button class="btn danger-fill" id="yes">${t('Resign')}</button>
-      <button class="btn" data-close>${t('Keep playing')}</button></div>`);
+      <button class="btn go" data-close>${t('Keep playing')}</button></div>`);
   $('#yes').onclick = () => { closeSheet(); Live.resign(G.match.id); };
 }
 
 /* ---------- endings ---------- */
+/* the XP tile on a result card: +5 for a win, 0 for a loss or a draw, -5 for resigning or a connection that did not come back */
+const xpTile = xp => `<div><b class="${xp > 0 ? 'up' : xp < 0 ? 'dn' : ''}" data-to="${xp}" ${xp > 0 ? 'data-plus="1"' : ''}>${xp > 0 ? '+' + xp : xp}</b><span>XP</span></div>`;
 async function endGame(st){                       // bot and pass-and-play
   if (G.over) return;
   G.over = true; refresh();
@@ -7293,7 +8181,7 @@ async function endGame(st){                       // bot and pass-and-play
     try{ const r = await Backend.botResult(G.game, G.botLevel, res); setPlayer(r.player); xp = r.xp; ups = r.levelsGained; }catch(e){}
     title = myWin ? t('You won!') : draw ? t('Draw') : t('{name} won', { name: pl.opp.name });
     cls = myWin ? 'win' : draw ? 'draw' : 'lose';
-    body = `<div class="gain"><div><b class="up" data-to="${xp}" data-plus="1">+${xp}</b><span>XP</span></div>
+    body = `<div class="gain">${xpTile(xp)}
       <div><b data-to="${P.level}">${P.level}</b><span>${ups ? t('Level up!') : t('Level')}</span></div>
       <div><b data-to="${ST(G.game).botW}">${ST(G.game).botW}</b><span>${t('Bots beaten')}</span></div></div>`;
   }
@@ -7324,11 +8212,11 @@ async function endRanked(r){                      // the server has settled the 
   }
   const won = r.status === 'won', draw = r.status === 'drawn';
   const pl = players(), delta = r.ratingDelta || 0, payout = r.payout || 0;
-  const xp = Rules.rankedXP(won ? 'W' : draw ? 'D' : 'L');
+  const xp = r.xp != null ? r.xp : Rules.rankedXP(won ? 'W' : draw ? 'D' : 'L', r.endReason);
   const body = `<div class="gain">
-      <div><b class="${payout ? 'up' : ''}" data-to="${payout}" data-plus="1">${payout ? '+' + payout : '0'}</b><span>${t('Tokens')}${r.payoutBonus ? ' ' + t('({n} bonus)', { n: r.payoutBonus }) : ''}</span></div>
+      <div><b class="${payout ? 'up' : ''}" data-to="${payout}" ${payout ? 'data-plus="1"' : ''}>${payout ? '+' + payout : '0'}</b><span>${t('Tokens')}${r.payoutBonus ? ' ' + t('({n} bonus)', { n: r.payoutBonus }) : ''}</span></div>
       <div><b class="${delta >= 0 ? 'up' : 'dn'}" data-to="${delta}" ${delta >= 0 ? 'data-plus="1"' : ''}>${delta >= 0 ? '+' : ''}${delta}</b><span>${t('Rating')}</span></div>
-      <div><b class="up" data-to="${xp}" data-plus="1">+${xp}</b><span>XP</span></div></div>
+      ${xpTile(xp)}</div>
     ${won ? `<div class="note">${t('{n} tokens moved into your balance. Cash out to telebirr at 1 token = 1 birr.', { n: r.pot })}</div>` : ''}`;
   await celebrate(r.endReason, won, draw, won ? G.my : draw ? null : other(G.my));
   resultSheet({ title: won ? t('You won the pool!') : draw ? t('Draw') : t('{name} won', { name: tServer(r.opp.name) }), cls: won ? 'win' : draw ? 'draw' : 'lose',
@@ -7477,44 +8365,86 @@ SCREENS.learn = () => {
   $$('[data-game]').forEach(b => b.onclick = () => { setGameId(b.dataset.game); beep('tap'); go('learn'); });
 };
 
-/* A lesson: read the explanation, then solve the task on the board. The engine checks the answer. */
+/* A lesson: read the explanation, then show you understand it with three correct moves in a row (a wrong move starts
+   the count again). After that the board stays yours: keep moving your own pieces to practice as long as you like.
+   The engine checks every answer. */
 SCREENS.lesson = () => {
   const g = gameId0(), Game = GAMES[g], list = LESSONS[g];
-  const i = view.data.i, L = list[i], task = L.task, steps = task.steps;
+  const i = view.data.i, L = list[i], task = L.task, rounds = lessonRounds(g, i);
   const already = ST(g).lessons.includes(i), next = i + 1 < list.length ? i + 1 : null;
+  const totalMoves = rounds.reduce((n, r) => n + r.steps.filter(x => x.goal !== 'promote').length + (r.steps.some(x => x.goal === 'promote') ? 1 : 0), 0);
   screen(`${appbar(t(L.t), g === 'chess' ? t('Chess lesson {n} of {total}', { n: i + 1, total: list.length }) : t('Checkers lesson {n} of {total}', { n: i + 1, total: list.length }), 'learn')}
   <div class="scroll"><div class="wrap wide lesson-layout">
     <div class="board-wrap"><div class="lesson-board">
       <div class="board-stage"><div class="board" id="lb"></div></div>
       <div class="lesson-under">
+        <div class="streak" id="lstreak" aria-live="polite"></div>
         <div class="task" id="ltask" aria-live="polite"></div>
-        <button class="btn flat sm" id="lreset">${t('Reset the position')}</button>
+        <div class="row" style="gap:6px; justify-content:center; flex-wrap:wrap">
+          <button class="btn flat sm" id="lreset">${t('Reset the position')}</button>
+          <button class="btn flat sm" id="lfree" ${already ? '' : 'hidden'}>${t('Free practice')}</button>
+        </div>
       </div>
     </div></div>
     <div class="lesson-text">
       <div class="prose">${L.p.map(x => `<p>${esc(t(x))}</p>`).join('')}</div>
+      <p class="tiny" style="margin:0 0 10px">${totalMoves > 1 ? t('Show you understand: make {n} correct moves in a row. A wrong move starts the count again.', { n: totalMoves }) : t('Show you understand: make the winning moves.')}</p>
       <button class="btn go" id="fin" style="margin-top:6px" ${already ? '' : 'disabled'}>
         ${already ? (next != null ? t('Next lesson') : t('Back to lessons')) : t('Solve the task to finish (+{n} XP)', { n: Rules.LESSON_XP })}</button>
     </div>
   </div></div>`);
 
-  const board = createBoard($('#lb'), g), box = $('#ltask'), fin = $('#fin');
+  const board = createBoard($('#lb'), g), box = $('#ltask'), fin = $('#fin'), streakEl = $('#lstreak');
   const sizeIt = () => fitBoard($('#lb'), { holder: $('.lesson-board'), below: [$('.lesson-under')], max: 600, min: 150, pad: 14 });
   refit(sizeIt);
-  const startPos = () => L.fen ? Game.fromFen(L.fen) : L.pos ? Game.setup(L.pos) : Game.start();
-  let s, sel, path = null, step, solved = false, busyBoard = false;
-  const say = (icon, text, cls) => { box.className = 'task' + (cls ? ' ' + cls : ''); box.innerHTML = `<span class="dotc">${icon}</span><span>${esc(t(text))}</span>`; };
-  const reset = () => {
-    s = startPos(); sel = null; step = 0; solved = false; busyBoard = false; path = null;
-    board.setPosition(s); board.setMarks({}); say('👆', steps[0].hint);
+  const posOf = r => r.fen ? Game.fromFen(r.fen) : r.pos ? Game.setup(r.pos) : Game.start();
+  let s, sel, path = null, step, round = 0, streak = 0, solved = false, busyBoard = false, practice = false, steps = rounds[0].steps;
+  const pawnArt = artFor(g, g === 'chess' ? 'wP' : 'wM');
+  const say = (icon, text, cls, vars) => { box.className = 'task' + (cls ? ' ' + cls : '');
+    const ic = icon === '♟' ? `<span class="dotc pawn" aria-hidden="true">${pawnArt}</span>` : `<span class="dotc">${icon}</span>`;
+    box.innerHTML = `${ic}<span>${esc(t(text, vars))}</span>`; };
+  const drawStreak = () => {
+    if (practice){ streakEl.innerHTML = `<span class="practice-chip"><span class="pawn-ic" aria-hidden="true">${pawnArt}</span>${t('Free practice')}</span>`; return; }
+    if (totalMoves < 2){ streakEl.innerHTML = ''; return; }
+    streakEl.innerHTML = Array.from({ length: totalMoves }, (_, k) => `<i class="${k < streak ? 'on' : ''}"></i>`).join('')
+      + `<span style="margin-left:6px">${t('{n} of {total} in a row', { n: streak, total: totalMoves })}</span>`;
   };
+  /* in practice white keeps the move: only your own pieces move, and a king is never "captured" */
+  const legalNow = () => practice ? Game.legal(s).filter(m => !(s.b[m.to] && s.b[m.to][1] === 'K' && Game.id === 'chess')) : Game.legal(s);
+  const loadRound = (r, keepStreak) => {
+    round = r; steps = rounds[r].steps; s = posOf(rounds[r]); sel = null; step = 0; busyBoard = false; path = null;
+    if (!keepStreak) streak = 0;
+    board.setPosition(s); board.setMarks({}); say('👆', steps[0].hint); drawStreak();
+  };
+  const reset = () => { solved = false; practice = false; loadRound(0); };
   const fail = text => {
     busyBoard = true; say('✕', text, 'bad'); beep('lose');
-    setTimeout(() => { if (view.screen === 'lesson' && view.data.i === i) reset(); }, 1500);
+    const had = streak; streak = 0; drawStreak();
+    setTimeout(() => {
+      if (view.screen !== 'lesson' || view.data.i !== i) return;
+      loadRound(0);
+      if (had && totalMoves > 1) say('👆', 'Start again: {n} correct moves in a row.', '', { n: totalMoves });
+      setTimeout(() => { if (view.screen === 'lesson' && view.data.i === i && !practice && !solved && step === 0) say('👆', steps[0].hint); }, 1600);
+    }, 1500);
+  };
+  const enterPractice = (fromStart) => {
+    practice = true; busyBoard = false; sel = null; path = null;
+    if (fromStart){ s = posOf(rounds[0]); board.setPosition(s); }
+    s = Object.assign({}, s, { turn: 'w', ep: null });
+    board.setMarks({}); drawStreak();
+    say('♟', 'Free practice: keep moving your own pieces as much as you like. Tap Reset the position to start over.');
+    $('#lfree').hidden = true;
   };
   const succeed = () => {
-    solved = true; busyBoard = true; say('✓', task.done, 'ok'); beep('win');
-    if (!already){ fin.disabled = false; fin.textContent = t('Finish lesson (+{n} XP)', { n: Rules.LESSON_XP }); }
+    solved = true; busyBoard = true; say('✓', task.done, 'ok'); beep('win'); drawStreak();
+    if (!already && !ST(g).lessons.includes(i)){ fin.disabled = false; fin.textContent = t('Finish lesson (+{n} XP)', { n: Rules.LESSON_XP }); }
+    setTimeout(() => { if (view.screen === 'lesson' && view.data.i === i && solved && !practice) enterPractice(false); }, 1900);
+  };
+  const roundDone = () => {
+    if (round + 1 >= rounds.length) return succeed();
+    busyBoard = true; beep('coin');
+    say('✓', 'Correct! {n} of {total} in a row. Here is the next one.', 'ok', { n: streak, total: totalMoves });
+    setTimeout(() => { if (view.screen === 'lesson' && view.data.i === i && !solved) loadRound(round + 1, true); }, 1100);
   };
   const blackReplies = then => {
     busyBoard = true;
@@ -7536,21 +8466,31 @@ SCREENS.lesson = () => {
     }
     return false;
   };
+  /* a practice move: play it, and give white the move again */
+  const practiceMove = m => {
+    const before = s;
+    s = Object.assign({}, Game.apply(before, m), { turn: 'w', ep: null }); sel = null; path = null;
+    board.animate(Game.anim(before, m), s); board.setMarks({ last: m });
+    beep(m.cap || (m.caps && m.caps.length) ? 'cap' : 'move');
+    if (!legalNow().length) say('♟', 'No more moves for white here. Tap Reset the position to start over.');
+  };
 
   board.onSquare(idx => {
-    if (busyBoard || solved || Game.turnOf(s) !== 'w') return;
+    if (busyBoard || (solved && !practice) || Game.turnOf(s) !== 'w') return;
+    const legal = legalNow();
     const from = path ? path[0] : sel;
     if (from != null){
       const want = (path || [sel]).concat(idx);
-      const matches = Game.legal(s).filter(m => (m.path || [m.from, m.to]).slice(0, want.length).join() === want.join());
+      const matches = legal.filter(m => (m.path || [m.from, m.to]).slice(0, want.length).join() === want.join());
       const exact = matches.filter(m => (m.path || [m.from, m.to]).length === want.length);
       if (exact.length && matches.length === exact.length){
         const m = exact.find(x => !x.promo || x.promo === 'Q' || Game.id === 'checkers') || exact[0];
+        if (practice) return practiceMove(m);
         const before = s, st = steps[step];
         s = Game.apply(s, m); sel = null; path = null;
         board.animate(Game.anim(before, m), s); board.setMarks({ last: m }); beep('move');
         if (st.goal === 'promote'){
-          if (m.promo) return succeed();
+          if (m.promo){ streak = totalMoves; return succeed(); }
           if (!s.b.includes('wP')) return fail('The pawn is gone, so white can no longer win. Try again.');
           if (Game.status(s).over) return fail('That is stalemate: black cannot move, so the game is a draw. Try again.');
           return blackReplies(() => {
@@ -7559,8 +8499,8 @@ SCREENS.lesson = () => {
           });
         }
         if (!meets(st, before, m, s)) return fail(st.wrong || 'Not quite. Try again.');
-        step++;
-        if (step === steps.length) return succeed();
+        streak++; step++; drawStreak();
+        if (step === steps.length) return roundDone();
         if (task.reply) return blackReplies(() => say('👆', steps[step].hint));
         say('👆', steps[step].hint); return;
       }
@@ -7568,9 +8508,9 @@ SCREENS.lesson = () => {
     }
     const p = s.b[idx];
     if (p && p[0] === 'w' && sel !== idx){
-      if (!Game.legal(s).some(m => m.from === idx) && Game.legal(s).some(m => m.caps && m.caps.length)){
+      if (!legal.some(m => m.from === idx) && legal.some(m => m.caps && m.caps.length)){
         sel = null; path = null; beep('lose');
-        board.setMarks({ hints: Game.legal(s).filter(m => m.caps.length).map(m => ({ to: m.from, cap: true })) });
+        board.setMarks({ hints: legal.filter(m => m.caps.length).map(m => ({ to: m.from, cap: true })) });
         return toast(t('A jump is available, so you have to take it.'));
       }
       sel = idx; path = null; beep('tap'); showHints();
@@ -7579,12 +8519,17 @@ SCREENS.lesson = () => {
   });
   function showHints(){
     const want = path || [sel];
-    board.setMarks({ sel, hints: Game.legal(s)
+    board.setMarks({ sel, hints: legalNow()
       .filter(m => (m.path || [m.from, m.to]).slice(0, want.length).join() === want.join())
       .map(m => ({ to: (m.path || [m.from, m.to])[want.length], cap: !!(m.cap || m.ep || (m.caps && m.caps.length)) }))
       .filter(h => h.to != null) });
   }
-  $('#lreset').onclick = () => { beep('tap'); reset(); };
+  $('#lreset').onclick = () => {
+    if (practice){ enterPractice(true); return; }
+    if (solved) return reset();
+    loadRound(round, true);                                  // the same position again; the count so far is kept
+  };
+  $('#lfree').onclick = () => { solved = true; enterPractice(true); };
   fin.onclick = () => busy(fin, async () => {
     if (!ST(g).lessons.includes(i)){
       if (!solved) return;
@@ -7933,7 +8878,7 @@ SCREENS.ranked = () => {
     <div class="game-pick small" role="tablist" aria-label="${t('Choose a game')}">
       ${Rules.GAMES_PLAYABLE.map(id => `<button role="tab" aria-selected="${id === g}" data-game="${id}">
         <span class="tab-art">${artFor(id, id === 'chess' ? 'wN' : 'wM')}</span>
-        <b>${gname(id)}</b><span>${t('{n} rating', { n: ST(id).rating })}</span></button>`).join('')}
+        <b>${gname(id)}</b></button>`).join('')}
     </div>
     <div class="pool" style="margin-top:12px">
       <div class="tiny" style="font-weight:700">${t('Prize pool at this table')}</div>
@@ -7956,7 +8901,7 @@ SCREENS.ranked = () => {
     </div>
     <div style="margin-top:18px">${officialNotice({ compact: true, link: true })}</div>
     ${netNotice()}
-    ${Backend.mode === 'local' ? `<div class="note" style="margin-top:12px"><b>${t('Demo mode:')}</b> ${t('no server is connected, so your opponent here is the computer. With the server running you are matched with real players.')}</div>` : ''}
+    ${Backend.mode === 'local' ? `<div class="note" style="margin-top:12px"><b>${t('Demo mode:')}</b> ${t('Find an opponent looks for real players online, phone to phone, with demo tokens only. If nobody near your rating is online, you can choose the practice computer instead.')}</div>` : ''}
     ${afford ? `<button class="btn go xl" id="find" style="margin-top:22px">${t('Find an opponent')}</button>`
       : `<div class="card center" style="margin-top:18px"><p class="muted">${t('You need at least {n} tokens to sit at a ranked table.', { n: Rules.STAKES[0] })}</p>
           <button class="btn go sm" data-go="buy">${t('Buy tokens with telebirr')}</button></div>`}
@@ -8117,15 +9062,20 @@ function startSearch(stake, game){
       <div class="tiny" id="searchInfo">${t('{game} · {n}-token table · players near {r}', { game: gname(game), n: stake, r: ST(game).rating })}</div>
       <div class="tiny" id="searchTime">0:00</div>
       <div class="tiny" id="searchFair" style="margin-top:6px">${t('Searching within ±{n} rating', { n: Rules.matchWindow(0) })}</div>
-      <div class="tiny net-line" id="searchNet">${ICONS.wifi}<span>${t('Checking your connection…')}</span></div></div>
-    <button class="btn" id="stopSearch">${t('Cancel')}</button>`);
+      <div class="tiny net-line" id="searchNet">${ICONS.wifi}<span>${t('Checking your connection…')}</span></div>
+      <div class="note" id="searchOnline" style="margin-top:8px; text-align:center" hidden></div></div>
+    <div class="stack">
+      ${Backend.mode === 'local' ? `<button class="btn" id="vsComputer" hidden>${t('Play the practice opponent (computer) instead')}</button>` : ''}
+      <button class="btn" id="stopSearch">${t('Cancel')}</button></div>`);
   bg.addEventListener('click', e => { if (e.target === bg) stopSearch(); }, true);
   $('#stopSearch').onclick = stopSearch;
+  if ($('#vsComputer')) $('#vsComputer').onclick = () => { $('#vsComputer').disabled = true; Live.playComputer && Live.playComputer(); };
   search.timer = setInterval(() => {
     const el = $('#searchTime'); if (!el || !search) return;
     const sec = Math.floor((Date.now() - search.since) / 1000);
     el.textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
     const w = Math.min(Rules.matchWindow(Date.now() - search.since), search.provisional ? Rules.MATCH.PROVISIONAL_GAP : Infinity);
+    if (sec >= 12 && $('#vsComputer') && search.online) $('#vsComputer').hidden = false;    // waiting a while: offer the computer, never force it
     const fair = $('#searchFair'); if (!fair) return;
     fair.textContent = w < Rules.MATCH.MAX_GAP && !(search.provisional && w >= Rules.MATCH.PROVISIONAL_GAP)
       ? t('Searching within ±{n} rating', { n: w })
@@ -8146,6 +9096,17 @@ function onMatchmaking(msg){
   }
   if (msg.t === 'queued' && search){
     search.provisional = !!msg.provisional;
+    if ('online' in msg){
+      search.online = !!msg.online;
+      const box = $('#searchOnline');
+      if (box){
+        box.hidden = false;
+        box.innerHTML = msg.online
+          ? `<span class="pulse-dot" aria-hidden="true"></span>${t('Looking for real players online at this table. Keep this screen open: the match starts as soon as someone near your rating joins.')}`
+          : msg.failed ? t('Online play cannot be reached from here right now, so your opponent is the practice computer.')
+          : t('Online play is not available on this device or connection, so your opponent is the practice computer.');
+      }
+    }
     const info = $('#searchInfo');
     if (info && msg.matchRating && msg.matchRating !== msg.rating)
       info.textContent = t('{game} · {n}-token table · matched as {r} (your best rating minus {m})', { game: gname(search.game), n: search.stake, r: msg.matchRating, m: Rules.MATCH.SANDBAG_MARGIN });
@@ -8335,7 +9296,6 @@ function codeFrom(text){
 })();
 function pendingFriendCode(){
   const c = lsGet(FRIEND_KEY, null);
-  if (c && P && P.name && !isJunior()){ lsSet(FRIEND_KEY, null); setTimeout(() => toast(t('Play Friends is only for junior accounts.')), 400); return null; }
   return c;
 }
 function takeFriendCode(){ const c = lsGet(FRIEND_KEY, null); lsSet(FRIEND_KEY, null); return c; }
@@ -8371,7 +9331,7 @@ SCREENS.friends = () => {
       </div>
       ${scanSupported() ? `<button class="btn" id="fScan" style="margin-top:10px">${ICONS.scan}${t('Scan a QR code')}</button>` : ''}
     </div>
-    <div class="note" style="margin-top:16px">${ICONS.shield}<span>${t('Play only with friends you know. Share your code with them, not in public groups. Friend games are only between junior accounts, and there is no chat.')}</span></div>
+    <div class="note with-ic" style="margin-top:16px">${ICONS.shieldOk}<span>${t('Play only with friends you know. Share your code with them, not in public groups. Junior accounts play only with junior accounts, and adult accounts only with adult accounts. Friendly games have no tokens, no rating and no chat.')}</span></div>
   </div></div>${tabbar('play')}`);
   $$('[data-game]').forEach(b => b.onclick = () => { setGameId(b.dataset.game); beep('tap'); go('friends'); });
   const inp = $('#fCode'), join = $('#fJoin');
@@ -8418,6 +9378,8 @@ function drawFriendInvite(){
     <div class="qr-box" aria-label="${t('QR code for your friend')}">${QR.svg(inv.url, { size: 232, dark: '#1E1C19', light: '#FFFFFF', label: t('QR code for your friend') })}</div>
     <div class="friend-code" aria-label="${t('Your code')}">${esc(fmtCode(inv.code))}</div>
     <p class="tiny" style="margin:6px 0 0"><span class="pulse-dot" aria-hidden="true"></span>${t('Waiting for your friend to join… The code works for {n} minutes, once.', { n: mins })}</p>
+    ${Backend.mode === 'local' ? `<p class="tiny" style="margin:4px 0 0">${inv.online === true ? t('Online: your friend can join from their own phone, wherever they are.')
+      : inv.online === false ? t('Online play could not start on this connection, so friends cannot join this code from another phone right now.') : t('Connecting…')}</p>` : ''}
     <div class="row" style="gap:8px; margin-top:14px">
       <button class="btn" id="fShare">${ICONS.share}${t('Share')}</button>
       <button class="btn" id="fCopy">${ICONS.copy}${t('Copy link')}</button>
@@ -8620,7 +9582,9 @@ const FAQ = [
   ['I lost my SIM card.', 'Your account is tied to your number. Ethio Telecom and Safaricom can give you a new SIM with the same number at a service center. Then sign in as usual.'],
   ['How do I take a break from playing?', 'Open Profile, then Limits and breaks. You can set deposit limits, play-time reminders, or a break from 24 hours to permanently.'],
   ['I am under 18. Can I play?', 'Yes, with a junior account: lessons, the four bots and pass-and-play, in English or Amharic. Tokens, ranked tables and cash-outs open on your 18th birthday. If you are under 16, a parent or guardian must agree first: we text them a code.'],
-  ['How do I play with a friend?', 'Junior accounts only: tap Play Friends, make a code and let your friend scan the QR code, or send them the link. When they join, the game starts on both phones, wherever you both are. Only friends with a junior account can join, and there is no chat.'],
+  ['How do I play with a friend?', 'Tap Play Friends, make a code and let your friend scan the QR code, or send them the link. When they join, the game starts on both phones, wherever you both are. Friendly games have no tokens and no rating. Junior accounts play only with junior accounts, adult accounts only with adult accounts, and there is no chat.'],
+  ['Can I leave a game and come back?', 'In Play Friends, bots and pass-and-play, yes: leave from the game screen and come back from the home screen. A ranked match cannot be paused or left for later; the only way out is to resign. If your internet connection drops, you have {n} seconds to reconnect.'],
+  ['How do levels work?', 'Every 50 XP is a new level, up to level 999. Winning a game earns 5 XP. Losing or a draw earns nothing. Resigning, or losing a connection and not coming back in time, costs 5 XP. Finishing a lesson earns XP too.'],
   ['I am a parent. How do I close my child’s account?', 'Write to us below or call support, and tell us the child’s phone number. We close the account and erase its name, settings and your contact. Your child can also close it in Profile.']
 ];
 const TICKET_CATS = [['payment', 'Buying tokens'], ['cashout', 'Cash-outs'], ['account', 'My account or sign-in'], ['fair_play', 'Fair play or a report'], ['game', 'A game or a bug'], ['other', 'Something else']];
@@ -8675,7 +9639,8 @@ SCREENS.help = () => {
 const BOARD_SETS = [['green','Green'],['wood','Wood'],['classic','Classic red'],['ice','Ice'],['dusk','Dusk']];
 SCREENS.you = () => {
   const g = gameId0(), st = ST(g), jr = isJunior();
-  const tr = Rules.tierOf(st.rating), need = Rules.xpNeeded(P.level), pct = Math.round(P.xp/need*100);
+  const tr = Rules.tierOf(st.rating), need = Rules.xpNeeded(P.level), maxed = P.level >= Rules.MAX_LEVEL;
+  const pct = maxed ? 100 : Math.min(100, Math.round(P.xp/need*100));
   const games = st.w + st.l + st.d;
   const sw = (id, on, label) => `<button class="switch" id="${id}" role="switch" aria-checked="${on}" aria-label="${label}"></button>`;
   const link = (attr, icon, title, sub) => `<button class="set-row as-btn" ${attr}><span class="row-ic">${icon}</span><div style="flex:1; min-width:0"><b>${title}</b>${sub ? `<div class="tiny">${sub}</div>` : ''}</div>${ICONS.chev}</button>`;
@@ -8692,7 +9657,7 @@ SCREENS.you = () => {
               ${P.kycStatus === 'verified' ? `<span class="chip green">✓ ${t('Identity verified')}</span>` : ''}
               ${jr ? `<span class="chip junior-chip">${t('Junior account')}</span>` : ''}</div>
           </div></div>
-        <div class="between" style="margin:18px 0 7px"><b style="font-size:14px">${t('Level {n}', { n: P.level })}</b><span class="tiny">${P.xp} / ${need} XP</span></div>
+        <div class="between" style="margin:18px 0 7px"><b style="font-size:14px">${t('Level {n}', { n: P.level })}</b><span class="tiny">${maxed ? t('Top level reached') : `${P.xp} / ${need} XP`}</span></div>
         <div class="bar"><i style="width:${pct}%"></i></div>
       </div>
       ${jr ? `<div class="card sub-card" style="margin-top:12px">
@@ -8711,10 +9676,10 @@ SCREENS.you = () => {
           <b>${gname(id)}</b><span>${ST(id).rating}</span></button>`).join('')}
       </div>
       ${jr ? `<div class="stat-grid">
-        <div><b>${st.lessons.length}/${LESSONS[g].length}</b><span>${t('Lessons')}</span></div>
-        <div><b>${st.botW}</b><span>${t('Bots beaten')}</span></div>
-        <div><b>${P.level}</b><span>${t('Level')}</span></div>
-        <div><b>${fmt(P.xp)}</b><span>${t('XP')}</span></div>
+        <div><b>${Math.min(st.lessons.length, LESSONS[g].length)}/${LESSONS[g].length}</b><span>${t('Lessons')}</span></div>
+        <div><b>${st.botW || 0}</b><span>${t('Bots beaten')}</span></div>
+        <div><b>${practiceStats(st).friendly}</b><span>${t('Friendly games')}</span></div>
+        <div><b>${practiceStats(st).rate || 0}%</b><span>${t('Win rate')}</span></div>
       </div>` : `<div class="stat-grid">
         <div><b>${st.rating}</b><span>${t('Ranked rating')}</span></div>
         <div><b>${games}</b><span>${t('Ranked games')}</span></div>
@@ -8930,7 +9895,7 @@ SCREENS.superappError = () => {
   const bar = document.createElement('div');
   bar.className = 'demo-bar';
   const drawBar = () => {
-    bar.innerHTML = `<span class="demo-chip">${t('DEMO')}</span><span class="demo-txt">${t('Practice version: no real money, nothing leaves this device')}</span>
+    bar.innerHTML = `<span class="demo-chip">${t('DEMO')}</span><span class="demo-txt">${t('Practice version: no real money. Only online games connect to other players.')}</span>
       <button class="demo-btn" id="demoTools">${t('Demo tools')}</button>`;
     bar.querySelector('#demoTools').onclick = () => { beep('tap'); demoTools(); };
   };
@@ -8992,7 +9957,8 @@ SCREENS.superappError = () => {
       <div class="lang-row">${langSwitch()}</div>
       <div class="stack" style="margin-top:14px">
         ${signed ? `
-        ${P.junior ? `<button class="btn" id="dtFriends">${t('Play Friends: make a code and let a pretend friend join')}</button>`
+        <button class="btn" id="dtFriends">${t('Play Friends: make a code and let a pretend friend join')}</button>
+        ${P.junior ? ''
         : `<button class="btn" id="dtTokens">${t('Add {n} demo tokens', { n: DEMO_TOKENS })}</button>
         <button class="btn" id="dtRanked">${t('Play a ranked match now')}</button>`}
         <button class="btn" id="dtPledge">${t('Show the fair-play notice players must accept')}</button>
@@ -9187,7 +10153,7 @@ SCREENS.superappError = () => {
     const box = document.getElementById('fInvite');
     if (!box || !friendState.invite || document.getElementById('fDemoJoin')) return;
     box.querySelector('.friend-qr').insertAdjacentHTML('beforeend', `<div class="note" style="margin-top:12px; text-align:left"><b>${t('Demo:')}</b>
-      ${t('nobody can scan this code from another phone, because the demo has no server. Let a pretend friend join instead.')}</div>
+      ${t('no friend nearby to try it with? Let a pretend friend (the computer) join instead.')}</div>
       <button class="btn go" id="fDemoJoin" style="margin-top:10px">${t('Demo: a friend scans the code now')}</button>`);
     document.getElementById('fDemoJoin').onclick = () => { beep('tap'); LocalLive.simulateFriendJoin(); };
   };
